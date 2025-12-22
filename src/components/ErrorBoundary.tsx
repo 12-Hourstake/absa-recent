@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { logAuditEvent } from '@/utils/auditLogger';
 
 interface Props {
   children: ReactNode;
@@ -24,15 +25,11 @@ class ErrorBoundary extends Component<Props, State> {
     
     // Log error to audit trail if possible
     try {
-      const logError = async () => {
-        const { logAuditEvent } = await import('@/utils/auditLogger');
-        logAuditEvent({
-          action: 'System Error',
-          entity: 'Application',
-          description: `Error boundary caught: ${error.message}`
-        });
-      };
-      logError();
+      logAuditEvent({
+        action: 'System Error',
+        entity: 'Application',
+        description: `Error boundary caught: ${error.message}`
+      });
     } catch (e) {
       // Fail silently if audit logging fails
     }
