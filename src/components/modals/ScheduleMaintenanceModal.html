@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ABSA Schedule Maintenance Modal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecda",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                        "slate-900": "#0f172a",
+                        "slate-700": "#334155",
+                        "slate-500": "#64748b",
+                        "slate-200": "#e2e8f0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 font-display overflow-hidden antialiased">
+<div class="relative flex h-screen w-full flex-row overflow-hidden">
+<aside class="flex h-full w-64 flex-col border-r border-slate-200 bg-white hidden lg:flex">
+<div class="flex items-center gap-3 px-6 py-6">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-10 w-10 bg-slate-100" data-alt="ABSA Logo abstract shape" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAE7c7QBwgRmtSU2BDZkI0zt6AB5B28vUa_Zz10AJo1HJT3IE5adfoc3AGY9m_JTDRiso90HdLcKnlGdDyVbVui-ZbE83GVQZrIIIHIq-hV8l03FKUeHST4ip_8GJqkcuX2GO5Z5f1DcKiDK_d9i6vP_Gt379V59PgaHlw-ZqeiPojJZOvCOcN_ipPXeCDG6pKw7sirsFLPPj4_GimjkpBbacTZP0oxBtvfdh_YyiNMKKCOv_PK0SdKma_nuSuGq3AcYVKQjVCJ1lmH");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 text-base font-bold leading-none">ABSA</h1>
+<p class="text-primary text-xs font-medium mt-1">Property Management</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 px-4 py-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-slate-500">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-slate-500">apartment</span>
+<span class="text-sm font-medium">Properties</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#e7fdfb] text-slate-900 shadow-sm border border-slate-100" href="#">
+<span class="material-symbols-outlined text-primary">build</span>
+<span class="text-sm font-bold">Maintenance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-slate-500">group</span>
+<span class="text-sm font-medium">Tenants</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-slate-500">payments</span>
+<span class="text-sm font-medium">Finance</span>
+</a>
+</nav>
+<div class="mt-auto p-4 border-t border-slate-200">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-9 w-9 bg-slate-200" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCIGqR7RC0p2yAhENe3ySfnlY6s5mGDrpenWzl2_AKjZ8NEpga4VD9IOI9BN9KRnWVqCnUvfOagBLtRrKYKAmkasfzpE7fhyrGj6J5QmbQr6ErgySiXfLX09h3qw4etKstIiNkdMuYRet6Pvc7s7VV7e0pUEwzrkl5MIKtruc7qKOipg1iOW5ZY7X1tdVtA5dUlc6C4krvUC6vgJU7nsiEK9tigbOkBGJOxaKn7ELlQxoAWwpsjYQeilM0xiSd3l0yYHbYePOP3Wusi");'></div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-slate-900">Kofi Annan</p>
+<p class="text-xs text-slate-500">Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fcfb] relative">
+<header class="flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4">
+<div>
+<h2 class="text-xl font-bold text-slate-900">Maintenance Management</h2>
+<p class="text-sm text-slate-500">Overview of all scheduled tasks</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+<input class="h-10 w-64 rounded-lg border-slate-200 bg-slate-50 pl-10 text-sm focus:border-primary focus:ring-primary" placeholder="Search tasks..." type="text"/>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-900">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-primary hover:bg-[#0fd6c5] text-slate-900 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+New Task
+</button>
+</div>
+</header>
+<div class="flex-1 p-8 opacity-40 pointer-events-none select-none">
+<div class="flex gap-4 mb-6">
+<div class="h-32 w-1/4 rounded-xl bg-white border border-slate-100 shadow-sm p-4"></div>
+<div class="h-32 w-1/4 rounded-xl bg-white border border-slate-100 shadow-sm p-4"></div>
+<div class="h-32 w-1/4 rounded-xl bg-white border border-slate-100 shadow-sm p-4"></div>
+<div class="h-32 w-1/4 rounded-xl bg-white border border-slate-100 shadow-sm p-4"></div>
+</div>
+<div class="h-full rounded-xl bg-white border border-slate-100 shadow-sm p-6">
+<div class="h-8 w-1/3 bg-slate-100 rounded mb-4"></div>
+<div class="h-4 w-full bg-slate-50 rounded mb-2"></div>
+<div class="h-4 w-full bg-slate-50 rounded mb-2"></div>
+<div class="h-4 w-full bg-slate-50 rounded mb-2"></div>
+</div>
+</div>
+<div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-[2px] p-4">
+<div class="w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-xl shadow-2xl animate-fade-in-up">
+<div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+<div>
+<h3 class="text-xl font-bold text-slate-900">Schedule Maintenance</h3>
+<p class="text-sm text-slate-500 mt-1">Create a new maintenance task for a property.</p>
+</div>
+<button class="text-slate-400 hover:text-slate-900 transition-colors p-2 rounded-lg hover:bg-slate-50">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+<form class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Task Name <span class="text-red-500">*</span></label>
+<input class="w-full h-11 px-4 rounded-lg border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" placeholder="e.g. Plumbing Repair" type="text" value="Generator Service - Osu Branch"/>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Type <span class="text-red-500">*</span></label>
+<div class="relative">
+<select class="w-full h-11 px-4 rounded-lg border-slate-200 bg-white text-slate-900 appearance-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
+<option>Preventive</option>
+<option selected="">Reactive</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
+<textarea class="w-full min-h-[100px] px-4 py-3 rounded-lg border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-primary focus:ring-1 focus:ring-primary resize-y" placeholder="Describe the issue or maintenance required...">Routine check of the backup generator fuel levels and oil filter replacement.</textarea>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Asset / System</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+<input class="w-full h-11 pl-10 pr-4 rounded-lg border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Search assets..." type="text" value="CAT Generator Model XJ-200"/>
+</div>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Frequency</label>
+<div class="relative">
+<select class="w-full h-11 px-4 rounded-lg border-slate-200 bg-white text-slate-900 appearance-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer">
+<option>One-time</option>
+<option>Daily</option>
+<option>Weekly</option>
+<option selected="">Quarterly</option>
+<option>Annually</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Start Date <span class="text-red-500">*</span></label>
+<div class="relative">
+<input class="w-full h-11 px-4 rounded-lg border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary" type="date" value="2023-11-20"/>
+</div>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Due Date</label>
+<div class="relative">
+<input class="w-full h-11 px-4 rounded-lg border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary" type="date" value="2023-11-22"/>
+</div>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Assignee <span class="text-red-500">*</span></label>
+<div class="relative cursor-pointer group">
+<div class="w-full h-11 px-4 rounded-lg border border-slate-200 bg-white flex items-center justify-between group-hover:border-primary group-focus-within:ring-1 group-focus-within:ring-primary">
+<div class="flex items-center gap-2">
+<div class="h-6 w-6 rounded-full bg-cover bg-center" data-alt="Assignee avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAY6bJ3OEUs1Do9dSwmayvLKrjf8gzn6nrSSnQOcsTuZZVWVyoHwKDPbV-UhgBV6ywFt4w26yS2e3eaW9NSfsJLXVdRR9c5x5JhH_tnuzYTLHlUqi640XxFfT43ghbZJPxWmj5-THTq10kV5rSEBjFZz_aXer5YCC1BbSr5XcQd6ou4JqSriaWyM4uhZyJdXk-0yRmEw9iXwusvB5PdGvEpYiFfjvGkD7P4m9Bdw3tdpgJKMM9KxJWYi-4DVg34vsAcKeDBLCSf5NkY");'></div>
+<span class="text-slate-900 text-sm">Kwame Mensah</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</div>
+</div>
+</div>
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Estimated Cost</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">GHS</span>
+<input class="w-full h-11 pl-14 pr-4 rounded-lg border-slate-200 bg-white text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary" placeholder="0.00" type="number" value="450.00"/>
+</div>
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-slate-700 mb-1.5">Attachments</label>
+<div class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg hover:border-primary hover:bg-slate-50 transition-colors cursor-pointer group">
+<div class="flex flex-col items-center justify-center pt-5 pb-6">
+<div class="p-2 bg-slate-100 rounded-full mb-2 group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">cloud_upload</span>
+</div>
+<p class="text-sm text-slate-500"><span class="font-semibold text-primary">Click to upload</span> or drag and drop</p>
+<p class="text-xs text-slate-400 mt-1">SVG, PNG, JPG or PDF (MAX. 5MB)</p>
+</div>
+</div>
+</div>
+</form>
+</div>
+<div class="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-200 rounded-b-xl">
+<button class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:text-slate-900 transition-colors focus:ring-2 focus:ring-slate-200">
+Cancel
+</button>
+<button class="px-5 py-2.5 rounded-lg bg-red-600 text-white text-sm font-bold shadow-sm hover:bg-red-700 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+Schedule Maintenance
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body>
+</html>

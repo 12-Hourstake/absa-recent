@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ABSA Log Utility Reading Modal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#13b9a5",
+              "primary-hover": "#0fa390",
+              "background-light": "#f8fcfb",
+              "background-dark": "#11211f",
+              "text-main": "#0e1b1a",
+              "text-secondary": "#4d9990",
+              "border-color": "#d0e7e4",
+              "input-bg": "#ffffff",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            boxShadow: {
+                'subtle': '0 4px 6px -1px rgba(19, 185, 165, 0.1), 0 2px 4px -1px rgba(19, 185, 165, 0.06)',
+                'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d0e7e4; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #13b9a5; 
+        }
+    </style>
+</head>
+<body class="bg-background-light text-text-main antialiased h-screen overflow-hidden relative">
+<div aria-hidden="true" class="absolute inset-0 z-0 flex flex-col pointer-events-none blur-[2px] opacity-50">
+<header class="h-16 border-b border-border-color bg-white flex items-center px-8">
+<div class="w-8 h-8 rounded-full bg-primary/20"></div>
+<div class="ml-auto flex gap-4">
+<div class="w-24 h-8 rounded bg-gray-100"></div>
+<div class="w-8 h-8 rounded-full bg-gray-200"></div>
+</div>
+</header>
+<div class="flex-1 p-8 grid grid-cols-4 gap-6">
+<div class="col-span-1 bg-white h-40 rounded-xl border border-border-color"></div>
+<div class="col-span-1 bg-white h-40 rounded-xl border border-border-color"></div>
+<div class="col-span-1 bg-white h-40 rounded-xl border border-border-color"></div>
+<div class="col-span-1 bg-white h-40 rounded-xl border border-border-color"></div>
+<div class="col-span-4 bg-white h-96 rounded-xl border border-border-color"></div>
+</div>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-[#0e1b1a]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+<div aria-labelledby="modal-title" aria-modal="true" class="relative w-full max-w-2xl bg-white rounded-xl shadow-modal flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200" role="dialog">
+<div class="flex items-center justify-between px-8 py-6 border-b border-border-color/50 bg-white sticky top-0 z-10">
+<div>
+<h2 class="text-text-main text-2xl font-bold tracking-tight" id="modal-title">Log Utility Reading</h2>
+<p class="text-sm text-gray-500 mt-1">Enter current meter details for property billing.</p>
+</div>
+<button aria-label="Close modal" class="group p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-text-main">close</span>
+</button>
+</div>
+<div class="overflow-y-auto p-8 space-y-6">
+<div>
+<label class="block text-text-main text-sm font-medium mb-2" for="utility-type">Utility Type</label>
+<div class="relative">
+<select class="w-full h-12 pl-12 pr-10 bg-input-bg border border-border-color rounded-lg text-text-main text-base focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer" id="utility-type">
+<option disabled="" selected="" value="">Select Utility Type</option>
+<option value="electricity">Electricity</option>
+<option value="water">Water</option>
+<option value="gas">Gas</option>
+<option value="solar">Solar</option>
+</select>
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-primary">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-secondary">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-text-main text-sm font-medium mb-2" for="property-search">Property / Unit</label>
+<div class="relative flex w-full">
+<input class="w-full h-12 pl-4 pr-12 bg-input-bg border border-border-color rounded-lg text-text-main text-base placeholder:text-text-secondary/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" id="property-search" placeholder="Search property (e.g. Flat 4B, Osu Castle Rd)" type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-primary">
+<span class="material-symbols-outlined">search</span>
+</div>
+</div>
+<p class="text-xs text-gray-400 mt-1.5 ml-1">Searching database for Ghanaian properties...</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-text-main text-sm font-medium mb-2" for="meter-reading">
+Meter Reading 
+<span class="text-xs font-normal text-text-secondary ml-1">(Units / GHS)</span>
+</label>
+<div class="relative">
+<input class="w-full h-12 pl-4 pr-12 bg-input-bg border border-border-color rounded-lg text-text-main text-base placeholder:text-text-secondary/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" id="meter-reading" placeholder="00000.00" step="0.01" type="number"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400 text-sm font-medium">
+Units
+</div>
+</div>
+</div>
+<div>
+<label class="block text-text-main text-sm font-medium mb-2" for="reading-date">Date of Reading</label>
+<div class="relative">
+<input class="w-full h-12 pl-4 pr-10 bg-input-bg border border-border-color rounded-lg text-text-main text-base placeholder:text-text-secondary/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-500" id="reading-date" placeholder="DD/MM/YYYY" type="date"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-primary">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+</div>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-text-main text-sm font-medium mb-2">Proof of Reading</label>
+<div class="group border-2 border-dashed border-border-color hover:border-primary/50 hover:bg-background-light transition-all rounded-lg p-6 flex flex-col items-center justify-center gap-3 cursor-pointer bg-white">
+<div class="w-12 h-12 rounded-full bg-background-light flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined text-[24px]">add_a_photo</span>
+</div>
+<div class="text-center">
+<p class="text-sm font-semibold text-text-main">Click to upload photo</p>
+<p class="text-xs text-text-secondary mt-1">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-text-main text-sm font-medium mb-2" for="notes">Additional Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+<textarea class="w-full p-4 bg-input-bg border border-border-color rounded-lg text-text-main text-base placeholder:text-text-secondary/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none" id="notes" placeholder="Add any observations about the meter condition..." rows="3"></textarea>
+</div>
+</div>
+<div class="px-8 py-5 border-t border-border-color/50 bg-gray-50 flex items-center justify-end gap-3 sticky bottom-0 z-10">
+<button class="px-5 py-2.5 rounded-lg border border-border-color bg-white text-text-main text-sm font-semibold hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all" type="button">
+Cancel
+</button>
+<button class="px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all" type="button">
+Log Reading
+</button>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+.background-slider {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  background-color: #1a1a2e;
+}
+
+.slider-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+  will-change: opacity, transform;
+  /* GPU acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.slider-image.active {
+  opacity: 1;
+  transform: translateX(0);
+  z-index: 2;
+}
+
+.slider-image.prev {
+  z-index: 1;
+}
+
+/* Smooth transitions for better performance */
+@media (prefers-reduced-motion: reduce) {
+  .slider-image {
+    transition: opacity 0.3s ease-in-out;
+    transform: none !important;
+  }
+}
+
+/* Optimize for mobile */
+@media (max-width: 768px) {
+  .slider-image {
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+/* Loading state optimization */
+.slider-image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.3) 0%, rgba(26, 26, 46, 0.5) 100%);
+  pointer-events: none;
+}

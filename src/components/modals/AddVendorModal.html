@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ABSA Add Vendor Modal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#11d4c4",
+                        "primary-hover": "#0ebcb0",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                        "surface": "#ffffff",
+                        "border-teal": "#cfe7e5",
+                        "text-main": "#0d1b1a",
+                        "text-secondary": "#4c9a93",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(17, 212, 196, 0.1), 0 2px 4px -1px rgba(17, 212, 196, 0.06)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cfe7e5; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #11d4c4; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-text-main font-display overflow-hidden">
+<div aria-hidden="true" class="relative w-full h-screen flex flex-col p-8 opacity-20 pointer-events-none select-none">
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-primary rounded-lg"></div>
+<h1 class="text-2xl font-bold text-text-main">Vendor Management</h1>
+</div>
+<div class="flex gap-4">
+<div class="w-32 h-10 bg-white border border-border-teal rounded-lg"></div>
+<div class="w-32 h-10 bg-primary rounded-lg"></div>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-6 mb-8">
+<div class="h-32 bg-white rounded-xl shadow-sm border border-border-teal p-6"></div>
+<div class="h-32 bg-white rounded-xl shadow-sm border border-border-teal p-6"></div>
+<div class="h-32 bg-white rounded-xl shadow-sm border border-border-teal p-6"></div>
+<div class="h-32 bg-white rounded-xl shadow-sm border border-border-teal p-6"></div>
+</div>
+<div class="flex-1 bg-white rounded-xl shadow-sm border border-border-teal p-6">
+<div class="h-12 bg-background-light rounded-lg mb-4 w-full"></div>
+<div class="space-y-4">
+<div class="h-16 border-b border-border-teal w-full"></div>
+<div class="h-16 border-b border-border-teal w-full"></div>
+<div class="h-16 border-b border-border-teal w-full"></div>
+</div>
+</div>
+</div>
+<div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog">
+<div class="fixed inset-0 bg-text-main/40 backdrop-blur-sm transition-opacity"></div>
+<div class="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-xl shadow-2xl transform transition-all overflow-hidden">
+<div class="flex items-center justify-between px-8 py-6 border-b border-border-teal/30 bg-white">
+<div>
+<h2 class="text-2xl font-bold text-text-main tracking-tight" id="modal-title">Add New Vendor</h2>
+<p class="text-text-secondary text-sm mt-1">Enter details to onboard a new service provider.</p>
+</div>
+<button aria-label="Close modal" class="group p-2 rounded-full hover:bg-background-light transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-text-main">close</span>
+</button>
+</div>
+<div class="overflow-y-auto p-8 bg-background-light/30">
+<form class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-6">
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Vendor Name <span class="text-red-500">*</span></span>
+<input class="form-input w-full h-12 px-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., Osei & Sons Plumbing" type="text"/>
+</label>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Contact Person <span class="text-red-500">*</span></span>
+<input class="form-input w-full h-12 px-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., Kwame Osei" type="text"/>
+</label>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Email Address <span class="text-red-500">*</span></span>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-secondary/60 text-xl">mail</span>
+<input class="form-input w-full h-12 pl-12 pr-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., kwame@oseisons.com.gh" type="email"/>
+</div>
+</label>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Phone Number <span class="text-red-500">*</span></span>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-secondary/60 text-xl">call</span>
+<input class="form-input w-full h-12 pl-12 pr-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., +233 24 456 7890" type="tel"/>
+</div>
+</label>
+</div>
+<div class="space-y-6">
+<div class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Service Categories</span>
+<div class="w-full min-h-[48px] px-3 py-2 rounded-lg bg-white border border-border-teal text-text-main focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all flex flex-wrap gap-2 items-center cursor-text">
+<div class="flex items-center bg-primary/10 text-primary-hover px-2 py-1 rounded text-sm font-medium border border-primary/20">
+<span>Plumbing</span>
+<button class="ml-1 hover:text-red-500 focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[16px] align-middle">close</span>
+</button>
+</div>
+<input class="flex-1 bg-transparent border-none focus:ring-0 p-0 text-sm placeholder:text-text-secondary/60 min-w-[120px]" placeholder="Add category..." type="text"/>
+<span class="material-symbols-outlined text-text-secondary/60">arrow_drop_down</span>
+</div>
+</div>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Business Address</span>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-secondary/60 text-xl">location_on</span>
+<input class="form-input w-full h-12 pl-12 pr-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., 12 Independence Ave, Accra" type="text"/>
+</div>
+</label>
+<div class="grid grid-cols-2 gap-4">
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Payment Terms</span>
+<div class="relative">
+<select class="form-select w-full h-12 pl-4 pr-10 rounded-lg bg-white border border-border-teal text-text-main focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none cursor-pointer">
+<option>Net 30 Days</option>
+<option>Net 15 Days</option>
+<option>Due on Receipt</option>
+<option>Prepaid</option>
+</select>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-secondary/60 pointer-events-none">expand_more</span>
+</div>
+</label>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Tax ID <span class="text-text-secondary font-normal">(Optional)</span></span>
+<input class="form-input w-full h-12 px-4 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="e.g., V001234567" type="text"/>
+</label>
+</div>
+<label class="flex flex-col w-full">
+<span class="text-text-main text-sm font-semibold mb-2">Notes <span class="text-text-secondary font-normal">(Optional)</span></span>
+<textarea class="form-textarea w-full h-24 px-4 py-3 rounded-lg bg-white border border-border-teal text-text-main placeholder:text-text-secondary/60 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none resize-none transition-all" placeholder="Add any additional notes about this vendor..."></textarea>
+</label>
+</div>
+</form>
+</div>
+<div class="flex items-center justify-end gap-3 px-8 py-5 bg-background-light border-t border-border-teal/30">
+<button class="h-11 px-6 rounded-lg border border-border-teal bg-white text-text-main font-medium hover:bg-gray-50 hover:border-text-secondary/50 focus:ring-2 focus:ring-gray-200 focus:outline-none transition-colors" type="button">
+Cancel
+</button>
+<button class="h-11 px-6 rounded-lg bg-primary text-white font-medium hover:bg-primary-hover shadow-soft focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 focus:outline-none transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+Add Vendor
+</button>
+</div>
+</div>
+</div>
+</body>
+</html>

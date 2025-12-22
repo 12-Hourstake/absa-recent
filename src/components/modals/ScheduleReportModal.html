@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ABSA Schedule Report Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#11d4d4",
+                        "primary-dark": "#0ebaba", 
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102222",
+                        "absa-dark": "#0d1b1b",
+                        "absa-border": "#cfe7e7",
+                        "absa-input-bg": "#f8fcfc",
+                        "absa-placeholder": "#4c9a9a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #cfe7e7;
+            border-radius: 3px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #4c9a9a;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-absa-dark overflow-hidden h-screen w-screen relative">
+<div aria-hidden="true" class="absolute inset-0 z-0 flex flex-col pointer-events-none opacity-40 blur-[2px]">
+<header class="h-16 bg-white border-b border-gray-200 w-full"></header>
+<div class="flex flex-1">
+<aside class="w-64 bg-white border-r border-gray-200 h-full hidden md:block"></aside>
+<main class="flex-1 p-8 bg-[#f8fcfc]">
+<div class="h-32 w-full bg-white rounded-xl mb-6 border border-gray-100"></div>
+<div class="grid grid-cols-3 gap-6">
+<div class="h-64 bg-white rounded-xl border border-gray-100"></div>
+<div class="h-64 bg-white rounded-xl border border-gray-100"></div>
+<div class="h-64 bg-white rounded-xl border border-gray-100"></div>
+</div>
+</main>
+</div>
+</div>
+<div aria-labelledby="modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#0d1b1b]/60 backdrop-blur-sm" role="dialog">
+<div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-xl shadow-2xl overflow-hidden group/design-root">
+<div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+<div>
+<h2 class="text-absa-dark text-xl font-bold leading-tight tracking-[-0.015em]" id="modal-title">Schedule Report</h2>
+<p class="text-gray-500 text-sm mt-1">Set up automated delivery for your property performance data.</p>
+</div>
+<button class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto modal-scroll px-6 py-6">
+<form class="flex flex-col gap-5">
+<div class="flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="template">Report Template</label>
+<div class="relative">
+<select class="appearance-none w-full h-12 px-4 rounded-lg border border-absa-border bg-absa-input-bg text-absa-dark focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base placeholder:text-absa-placeholder cursor-pointer" id="template" name="template">
+<option disabled="" value="">Select a template</option>
+<option selected="" value="accra-yields">Accra Commercial Rental Yields</option>
+<option value="kumasi-occupancy">Kumasi Residential Occupancy</option>
+<option value="takoradi-leases">Takoradi Industrial Lease Expiry</option>
+<option value="ghs-revenue">GHS Revenue Summary (Q3)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-5">
+<div class="flex-1 flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="frequency">Frequency</label>
+<div class="relative">
+<select class="appearance-none w-full h-12 px-4 rounded-lg border border-absa-border bg-absa-input-bg text-absa-dark focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base cursor-pointer" id="frequency" name="frequency">
+<option value="daily">Daily</option>
+<option selected="" value="weekly">Weekly</option>
+<option value="monthly">Monthly</option>
+<option value="quarterly">Quarterly</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="startDate">Start Date</label>
+<div class="relative">
+<input class="w-full h-12 px-4 rounded-lg border border-absa-border bg-absa-input-bg text-absa-dark focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base placeholder:text-absa-placeholder" id="startDate" name="startDate" type="date" value="2023-11-12"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="deliveryMethod">Delivery Method</label>
+<div class="relative">
+<select class="appearance-none w-full h-12 px-4 rounded-lg border border-absa-border bg-absa-input-bg text-absa-dark focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base cursor-pointer" id="deliveryMethod" name="deliveryMethod">
+<option selected="" value="email">Email</option>
+<option value="sharepoint">SharePoint</option>
+<option value="ftp">FTP / SFTP</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="recipients">Recipients</label>
+<div class="min-h-[56px] w-full px-2 py-2 rounded-lg border border-absa-border bg-absa-input-bg flex flex-wrap items-center gap-2 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
+<div class="flex items-center gap-1 bg-primary/20 text-teal-900 px-2 py-1.5 rounded text-sm font-medium">
+<span>kwame.mensah@absa.com.gh</span>
+<button class="hover:bg-primary/30 rounded-full p-0.5 flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="flex items-center gap-1 bg-primary/20 text-teal-900 px-2 py-1.5 rounded text-sm font-medium">
+<span>adwoa.boateng@absa.gh</span>
+<button class="hover:bg-primary/30 rounded-full p-0.5 flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<input class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-base text-absa-dark placeholder:text-absa-placeholder min-w-[100px] h-8 p-1" id="recipients" placeholder="Add email..." type="email"/>
+</div>
+<p class="text-xs text-gray-400">Press Enter to add recipients</p>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-absa-dark text-sm font-medium" for="format">Output Format</label>
+<div class="relative">
+<select class="appearance-none w-full h-12 px-4 rounded-lg border border-absa-border bg-absa-input-bg text-absa-dark focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-base cursor-pointer" id="format" name="format">
+<option selected="" value="pdf">PDF Document (.pdf)</option>
+<option value="excel">Excel Spreadsheet (.xlsx)</option>
+<option value="csv">CSV (.csv)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">description</span>
+</div>
+</div>
+</form>
+</div>
+<div class="px-6 py-5 border-t border-gray-100 bg-gray-50 rounded-b-xl flex flex-col sm:flex-row items-center justify-end gap-3">
+<button class="w-full sm:w-auto px-6 h-11 rounded-lg border border-gray-300 bg-white text-absa-dark font-medium text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors" type="button">
+Cancel
+</button>
+<button class="w-full sm:w-auto px-6 h-11 rounded-lg bg-primary hover:bg-primary-dark text-[#0d1b1b] font-semibold text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+Schedule Report
+</button>
+</div>
+</div>
+</div>
+</body>
+</html>
