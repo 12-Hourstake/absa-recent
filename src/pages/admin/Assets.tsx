@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,42 @@ import { getActiveVendors } from "@/data/mockVendors";
 
 const ITEMS_PER_PAGE = 10;
 
+// Asset category field mappings
+const ASSET_CATEGORIES = {
+  AIR_CONDITIONER: 'AIR_CONDITIONER',
+  GENERATOR: 'GENERATOR',
+  UPS: 'UPS',
+  AVR: 'AVR',
+  PHASE_ROTATION_CORRECTOR: 'PHASE_ROTATION_CORRECTOR',
+  AIR_PURIFIER: 'AIR_PURIFIER'
+} as const;
+
+type AssetCategoryType = keyof typeof ASSET_CATEGORIES;
+
+const CATEGORY_FIELDS: Record<AssetCategoryType, string[]> = {
+  AIR_CONDITIONER: [
+    'branch', 'locationOfAC', 'unitType', 'capacity', 'acType', 'bbgNumber', 'dateOfInstallation'
+  ],
+  GENERATOR: [
+    'branch', 'location', 'brand', 'capacity', 'serialNumber', 'dateOfInstallation', 'engineModel'
+  ],
+  UPS: [
+    'branch', 'location', 'upsModel', 'serialNumber', 'kva', 'dateInstalled', 'status',
+    'batteryLastReplacement', 'batteryStatus', 'endOfLifeStatus', 'inUse', 'batterySpecs',
+    'quantity', 'vendor', 'comments'
+  ],
+  AVR: [
+    'location', 'avrModel', 'serialNumber', 'kva', 'dateInstalled', 'avrStatus',
+    'endOfLifeStatus', 'inUse', 'quantity', 'vendor', 'comments'
+  ],
+  PHASE_ROTATION_CORRECTOR: [
+    'branch', 'phaseCorrectorModel', 'dateInstalled', 'vendor'
+  ],
+  AIR_PURIFIER: [
+    'branch', 'locationOfAirPurifier', 'brand', 'capacity', 'type', 'absaNumber', 'dateOfInstallation'
+  ]
+};
+
 const Assets = () => {
   const { assets, isLoading, error: contextError, addAsset, updateAsset, deleteAsset } = useAssets();
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,6 +88,8 @@ const Assets = () => {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
   // Form state
+  const [selectedCategory, setSelectedCategory] = useState<AssetCategoryType | ''>('');
+  const [dynamicFields, setDynamicFields] = useState<Record<string, any>>({});
   const [formData, setFormData] = useState<CreateAssetData>({
     name: "",
     type: AssetType.EQUIPMENT,
@@ -106,11 +145,35 @@ const Assets = () => {
   const handleAdd = async () => {
     try {
       if (!formData.name || !formData.location.branch) {
-        setError("Please fill in all required fields");
+        setError("Please fill in Asset Name and Branch");
         return;
       }
 
-      await addAsset(formData);
+      // Validate category-specific required fields if category is selected
+      if (selectedCategory) {
+        const requiredFields = CATEGORY_FIELDS[selectedCategory];
+        const missingFields = requiredFields.filter(field => {
+          const isRequired = ['locationOfAC', 'unitType', 'capacity', 'acType', 'bbgNumber', 
+                             'location', 'brand', 'engineModel', 'upsModel', 'kva', 
+                             'batteryStatus', 'avrModel', 'avrStatus', 'quantity',
+                             'phaseCorrectorModel', 'locationOfAirPurifier', 'type', 'absaNumber', 
+                             'dateOfInstallation', 'dateInstalled'].includes(field);
+          return isRequired && !dynamicFields[field];
+        });
+
+        if (missingFields.length > 0) {
+          setError(`Please fill in required category fields: ${missingFields.join(', ')}`);
+          return;
+        }
+      }
+
+      // Create asset with category-specific data in description
+      const assetData: CreateAssetData = {
+        ...formData,
+        description: selectedCategory ? JSON.stringify(dynamicFields) : formData.description
+      };
+
+      await addAsset(assetData);
       setSuccess("Asset added successfully!");
       setIsAddModalOpen(false);
       resetForm();
@@ -193,6 +256,140 @@ const Assets = () => {
       lastMaintenanceDate: undefined,
       nextMaintenanceDate: undefined
     });
+    setSelectedCategory('');
+    setDynamicFields({});
+  };
+
+  const handleCategoryChange = (category: AssetCategoryType) => {
+    setSelectedCategory(category);
+    setDynamicFields({});
+  };
+
+  const updateDynamicField = (fieldName: string, value: any) => {
+    setDynamicFields(prev => ({ ...prev, [fieldName]: value }));
+  };
+
+  const renderDynamicField = (fieldName: string) => {
+    const value = dynamicFields[fieldName] || '';
+    
+    switch (fieldName) {
+      case 'branch':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>Branch *</Label>
+            <Select value={value} onValueChange={(val) => updateDynamicField(fieldName, val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select branch" />
+              </SelectTrigger>
+              <SelectContent>
+                {branches.map(branch => (
+                  <SelectItem key={branch} value={branch}>{branch}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      
+      case 'unitType':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>Unit Type *</Label>
+            <Select value={value} onValueChange={(val) => updateDynamicField(fieldName, val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select unit type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Indoor">Indoor</SelectItem>
+                <SelectItem value="Outdoor">Outdoor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      
+      case 'endOfLifeStatus':
+      case 'inUse':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>{fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} *</Label>
+            <Select value={value} onValueChange={(val) => updateDynamicField(fieldName, val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Yes">Yes</SelectItem>
+                <SelectItem value="No">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      
+      case 'vendor':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>Vendor</Label>
+            <Select value={value} onValueChange={(val) => updateDynamicField(fieldName, val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select vendor" />
+              </SelectTrigger>
+              <SelectContent>
+                {vendors.map(vendor => (
+                  <SelectItem key={vendor.id} value={vendor.name}>{vendor.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      
+      case 'comments':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>Comments</Label>
+            <Textarea
+              id={fieldName}
+              value={value}
+              onChange={(e) => updateDynamicField(fieldName, e.target.value)}
+              placeholder="Enter comments"
+              rows={3}
+            />
+          </div>
+        );
+      
+      case 'dateOfInstallation':
+      case 'dateInstalled':
+      case 'batteryLastReplacement':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>{fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} *</Label>
+            <Input
+              id={fieldName}
+              type="date"
+              value={value}
+              onChange={(e) => updateDynamicField(fieldName, e.target.value)}
+            />
+          </div>
+        );
+      
+      default:
+        const isRequired = ['branch', 'locationOfAC', 'unitType', 'capacity', 'acType', 'bbgNumber', 
+                           'location', 'brand', 'serialNumber', 'engineModel', 'upsModel', 'kva', 
+                           'status', 'batteryStatus', 'avrModel', 'avrStatus', 'quantity',
+                           'phaseCorrectorModel', 'locationOfAirPurifier', 'type', 'absaNumber'].includes(fieldName);
+        
+        return (
+          <div className="space-y-2">
+            <Label htmlFor={fieldName}>
+              {fieldName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              {isRequired && ' *'}
+            </Label>
+            <Input
+              id={fieldName}
+              value={value}
+              onChange={(e) => updateDynamicField(fieldName, e.target.value)}
+              placeholder={`Enter ${fieldName.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+            />
+          </div>
+        );
+    }
   };
 
   const getStatusBadge = (status: AssetStatus) => {
@@ -405,6 +602,7 @@ const Assets = () => {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            {/* Core Asset Fields - Always Visible */}
             <div className="space-y-2">
               <Label htmlFor="name">Asset Name *</Label>
               <Input
@@ -431,14 +629,14 @@ const Assets = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as AssetCategory }))}>
+                <Label htmlFor="status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(AssetCategory).map(cat => (
-                      <SelectItem key={cat} value={cat}>{formatEnumValue(cat)}</SelectItem>
+                    {Object.values(AssetStatus).map(status => (
+                      <SelectItem key={status} value={status}>{formatEnumValue(status)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -471,49 +669,47 @@ const Assets = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="model">Model</Label>
+                <Label htmlFor="lastMaintenanceDate">Last Maintenance Date</Label>
                 <Input
-                  id="model"
-                  value={formData.technicalDetails.model}
-                  onChange={(e) => setFormData(prev => ({ ...prev, technicalDetails: { ...prev.technicalDetails, model: e.target.value } }))}
-                  placeholder="Enter model"
+                  id="lastMaintenanceDate"
+                  type="date"
+                  value={formData.lastMaintenanceDate ? new Date(formData.lastMaintenanceDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, lastMaintenanceDate: e.target.value ? new Date(e.target.value) : undefined }))}
                 />
               </div>
             </div>
 
+            {/* Category Selection */}
             <div className="space-y-2">
-              <Label htmlFor="manufacturer">Manufacturer</Label>
-              <Input
-                id="manufacturer"
-                value={formData.technicalDetails.manufacturer}
-                onChange={(e) => setFormData(prev => ({ ...prev, technicalDetails: { ...prev.technicalDetails, manufacturer: e.target.value } }))}
-                placeholder="Enter manufacturer"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
+              <Label htmlFor="category">Asset Category</Label>
+              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select asset category (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(AssetStatus).map(status => (
-                    <SelectItem key={status} value={status}>{formatEnumValue(status)}</SelectItem>
-                  ))}
+                  <SelectItem value="AIR_CONDITIONER">Air Conditioner (AC)</SelectItem>
+                  <SelectItem value="GENERATOR">Generator</SelectItem>
+                  <SelectItem value="UPS">UPS</SelectItem>
+                  <SelectItem value="AVR">AVR</SelectItem>
+                  <SelectItem value="PHASE_ROTATION_CORRECTOR">Phase Rotation Corrector</SelectItem>
+                  <SelectItem value="AIR_PURIFIER">Air Purifier</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter description"
-              />
-            </div>
+            {/* Category-Specific Fields */}
+            {selectedCategory && (
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-3">Category-Specific Information</h4>
+                <div className="grid gap-4">
+                  {CATEGORY_FIELDS[selectedCategory].map((fieldName) => (
+                    <div key={fieldName} className={fieldName === 'comments' ? 'col-span-full' : ''}>
+                      {renderDynamicField(fieldName)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

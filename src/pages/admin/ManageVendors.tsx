@@ -25,13 +25,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Edit, Trash2, Eye, Save, X, Search, Filter, Download, Star, TrendingUp, AlertCircle, ChevronRight } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Eye, Save, X, Search, Filter, Download, Star, TrendingUp, AlertCircle, ChevronRight, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBackButtonText } from "@/hooks/useBackButtonText";
+import { useSLA } from "@/contexts/SLAContext";
 
 const ManageVendors = () => {
   const navigate = useNavigate();
+  const { penalties } = useSLA();
   const [showAddVendorModal, setShowAddVendorModal] = useState(false);
+
+  // Calculate penalty totals for each vendor
+  const getVendorPenalties = (vendorName: string) => {
+    const vendorPenalties = penalties.filter(p => p.vendor === vendorName);
+    const totalAmount = vendorPenalties.reduce((sum, p) => sum + p.calculatedAmount, 0);
+    const pendingCount = vendorPenalties.filter(p => p.status === 'Pending Payment').length;
+    return { total: totalAmount, pending: pendingCount, count: vendorPenalties.length };
+  };
 
   const vendorFields = [
     { name: 'name', label: 'Vendor Name', type: 'text' as const, required: true, placeholder: 'Enter vendor name' },
@@ -84,6 +94,9 @@ const ManageVendors = () => {
       category: "Electrical",
       completedJobs: 45,
       totalRevenue: "GH₵ 125,000",
+      hasPortalAccess: true,
+      dateCreated: "2023-01-15",
+      services: ["Electrical Installation", "Maintenance", "Emergency Repairs"]
     },
     {
       id: "2",
@@ -97,6 +110,9 @@ const ManageVendors = () => {
       category: "HVAC",
       completedJobs: 38,
       totalRevenue: "GH₵ 98,500",
+      hasPortalAccess: true,
+      dateCreated: "2023-03-22",
+      services: ["AC Installation", "HVAC Maintenance", "Ventilation Systems"]
     },
     {
       id: "3",
@@ -110,6 +126,9 @@ const ManageVendors = () => {
       category: "Plumbing",
       completedJobs: 28,
       totalRevenue: "GH₵ 67,200",
+      hasPortalAccess: false,
+      dateCreated: "2023-05-10",
+      services: ["Pipe Installation", "Leak Repairs", "Drain Cleaning"]
     },
     {
       id: "4",
@@ -123,6 +142,9 @@ const ManageVendors = () => {
       category: "Security",
       completedJobs: 52,
       totalRevenue: "GH₵ 145,800",
+      hasPortalAccess: true,
+      dateCreated: "2022-11-08",
+      services: ["CCTV Installation", "Access Control", "Security Monitoring"]
     },
     {
       id: "5",
@@ -136,6 +158,9 @@ const ManageVendors = () => {
       category: "Landscaping",
       completedJobs: 15,
       totalRevenue: "GH₵ 32,400",
+      hasPortalAccess: false,
+      dateCreated: "2023-08-14",
+      services: ["Garden Maintenance", "Tree Trimming", "Lawn Care"]
     },
   ];
 
@@ -173,9 +198,21 @@ const ManageVendors = () => {
     setTimeout(() => setSuccess(""), 3000);
   };
 
+  const getPortalAccessBadge = (hasAccess: boolean) => {
+    return hasAccess ? (
+      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        Portal Access: Enabled
+      </Badge>
+    ) : (
+      <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">
+        Portal Access: Not Enabled
+      </Badge>
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     return status === "active" ? (
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Active</Badge>
     ) : (
       <Badge variant="secondary">Inactive</Badge>
     );
@@ -315,6 +352,7 @@ const ManageVendors = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-lg">{vendor.name}</h3>
                       {getStatusBadge(vendor.status)}
+                      {getPortalAccessBadge(vendor.hasPortalAccess)}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
                       <p>👤 {vendor.contact}</p>
@@ -325,7 +363,7 @@ const ManageVendors = () => {
                   </div>
                 </div>
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mt-4 md:mt-0">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-4 gap-4 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground">Rating</p>
                       <p className={`text-lg font-bold ${getRatingColor(vendor.rating)}`}>{vendor.rating}%</p>
@@ -337,6 +375,19 @@ const ManageVendors = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Revenue</p>
                       <p className="text-sm font-bold">{vendor.totalRevenue}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Penalties</p>
+                      <div className="flex flex-col items-center">
+                        <p className="text-sm font-bold text-red-600">
+                          GH₵ {getVendorPenalties(vendor.name).total.toLocaleString()}
+                        </p>
+                        {getVendorPenalties(vendor.name).pending > 0 && (
+                          <Badge className="bg-red-100 text-red-700 text-xs mt-1">
+                            {getVendorPenalties(vendor.name).pending} pending
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -375,53 +426,134 @@ const ManageVendors = () => {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Vendor Details</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Vendor Details</DialogTitle>
             <DialogDescription>
-              Complete information about this vendor.
+              Complete information about this vendor and their portal access.
             </DialogDescription>
           </DialogHeader>
           {selectedVendor && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm text-muted-foreground">Vendor ID</Label>
-                  <div className="font-medium">{selectedVendor.id}</div>
+            <div className="grid gap-6 py-4">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Basic Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Vendor Name</Label>
+                    <div className="font-medium text-base">{selectedVendor.name}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Date Created</Label>
+                    <div className="font-medium">{new Date(selectedVendor.dateCreated).toLocaleDateString('en-GB')}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Contact Person</Label>
+                    <div className="font-medium">{selectedVendor.contact}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Vendor Status</Label>
+                    <div className="font-medium capitalize">{selectedVendor.status}</div>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Name</Label>
-                  <div className="font-medium">{selectedVendor.name}</div>
+              </div>
+
+              {/* Contact Details */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Contact Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Email</Label>
+                    <div className="font-medium">{selectedVendor.email}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Phone</Label>
+                    <div className="font-medium">{selectedVendor.phone}</div>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Contact Person</Label>
-                  <div className="font-medium">{selectedVendor.contact}</div>
+              </div>
+
+              {/* Services & Portal Access */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Services & Access</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Assigned Services</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {selectedVendor.services?.map((service: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {service}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Portal Access Status</Label>
+                    <div className="mt-1">
+                      {getPortalAccessBadge(selectedVendor.hasPortalAccess)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedVendor.hasPortalAccess 
+                        ? "This vendor can access the vendor portal to view work orders and submit invoices."
+                        : "This vendor does not have portal access. Work orders are managed via phone/email."}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Email</Label>
-                  <div className="font-medium">{selectedVendor.email}</div>
+              </div>
+
+              {/* Performance Metrics */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Performance Metrics</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 p-3 rounded-lg text-center">
+                    <p className="text-lg font-bold text-blue-600">{selectedVendor.rating}%</p>
+                    <p className="text-xs text-muted-foreground">Rating</p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg text-center">
+                    <p className="text-lg font-bold text-green-600">{selectedVendor.completedJobs}</p>
+                    <p className="text-xs text-muted-foreground">Completed Jobs</p>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg text-center">
+                    <p className="text-sm font-bold text-purple-600">{selectedVendor.totalRevenue}</p>
+                    <p className="text-xs text-muted-foreground">Total Revenue</p>
+                  </div>
+                  <div className="bg-orange-50 p-3 rounded-lg text-center">
+                    <p className="text-sm font-bold text-orange-600">{selectedVendor.contractExpiry}</p>
+                    <p className="text-xs text-muted-foreground">Contract Expiry</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Phone</Label>
-                  <div className="font-medium">{selectedVendor.phone}</div>
-                </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Rating</Label>
-                  <div className="font-medium">{selectedVendor.rating}%</div>
-                </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Contract Expiry</Label>
-                  <div className="font-medium">{selectedVendor.contractExpiry}</div>
-                </div>
-                <div>
-                  <Label className="text-sm text-muted-foreground">Status</Label>
-                  <div className="font-medium capitalize">{selectedVendor.status}</div>
+              </div>
+              
+              {/* SLA Penalty Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">SLA Penalty Summary</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-red-50 p-4 rounded-lg text-center">
+                    <p className="text-lg font-bold text-red-600">
+                      GH₵ {getVendorPenalties(selectedVendor.name).total.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Total Penalties</p>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg text-center">
+                    <p className="text-lg font-bold text-yellow-600">
+                      {getVendorPenalties(selectedVendor.name).pending}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Pending Payment</p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-lg text-center">
+                    <p className="text-lg font-bold text-slate-600">
+                      {getVendorPenalties(selectedVendor.name).count}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Total Breaches</p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button onClick={() => setIsViewDialogOpen(false)} className="w-full sm:w-auto">
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

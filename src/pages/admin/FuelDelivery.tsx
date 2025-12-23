@@ -7,27 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Eye, AlertTriangle, Flag, X, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import CustomSelectDropdown from "@/components/ui/CustomSelectDropdown";
-import { mockFuelDeliveries, mockBranches } from "@/data";
+import { mockBranches } from "@/data";
 import { toast } from "sonner";
 import { FuelTabs } from "@/components/ui/FuelTabs";
 import { FuelType, loadFuelContext, saveFuelContext } from "@/utils/fuelContext";
-
-interface FuelDelivery {
-  id: string;
-  branchSite: string;
-  generator: string;
-  fuelCardUsed: string;
-  omc: string;
-  approvedQuantity: number;
-  deliveredQuantity: number;
-  tankLevelBefore: number;
-  tankLevelAfter: number;
-  discrepancyStatus: "matched" | "short-supplied" | "over-supplied";
-  escalationStatus: "none" | "pending" | "resolved";
-  deliveryDate: string;
-  notes: string;
-  createdAt: string;
-}
+import { FuelDataManager, FuelDelivery as FuelDeliveryType } from "@/utils/fuelDataManager";
 
 const FuelDelivery = () => {
   // Fuel context state
@@ -35,16 +19,16 @@ const FuelDelivery = () => {
     loadFuelContext("delivery")
   );
   
-  const [deliveries, setDeliveries] = useState<FuelDelivery[]>([]);
+  const [deliveries, setDeliveries] = useState<FuelDeliveryType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEscalateModal, setShowEscalateModal] = useState(false);
-  const [selectedDelivery, setSelectedDelivery] = useState<FuelDelivery | null>(null);
+  const [selectedDelivery, setSelectedDelivery] = useState<FuelDeliveryType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [formData, setFormData] = useState<Partial<FuelDelivery>>({});
+  const [formData, setFormData] = useState<Partial<FuelDeliveryType>>({});
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -58,16 +42,10 @@ const FuelDelivery = () => {
   };
 
   const loadDeliveries = () => {
-    const cached = localStorage.getItem("FUEL_DELIVERY_CACHE_V1");
-    if (cached) {
-      setDeliveries(JSON.parse(cached));
-    } else {
-      setDeliveries(mockFuelDeliveries);
-      localStorage.setItem("FUEL_DELIVERY_CACHE_V1", JSON.stringify(mockFuelDeliveries));
-    }
+    setDeliveries(FuelDataManager.getDeliveries(selectedFuelType));
   };
 
-  const getDiscrepancyBadge = (status: FuelDelivery["discrepancyStatus"]) => {
+  const getDiscrepancyBadge = (status: FuelDeliveryType["discrepancyStatus"]) => {
     switch (status) {
       case "matched":
         return <Badge className="bg-green-100 text-green-800">Matched</Badge>;
@@ -78,7 +56,7 @@ const FuelDelivery = () => {
     }
   };
 
-  const getEscalationBadge = (status: FuelDelivery["escalationStatus"]) => {
+  const getEscalationBadge = (status: FuelDeliveryType["escalationStatus"]) => {
     switch (status) {
       case "none":
         return <Badge variant="secondary">None</Badge>;
@@ -89,18 +67,18 @@ const FuelDelivery = () => {
     }
   };
 
-  const handleView = (delivery: FuelDelivery) => {
+  const handleView = (delivery: FuelDeliveryType) => {
     setSelectedDelivery(delivery);
     setShowViewModal(true);
   };
 
-  const handleEdit = (delivery: FuelDelivery) => {
+  const handleEdit = (delivery: FuelDeliveryType) => {
     setSelectedDelivery(delivery);
     setFormData(delivery);
     setShowEditModal(true);
   };
 
-  const handleEscalate = (delivery: FuelDelivery) => {
+  const handleEscalate = (delivery: FuelDeliveryType) => {
     setSelectedDelivery(delivery);
     setShowEscalateModal(true);
   };
@@ -111,7 +89,7 @@ const FuelDelivery = () => {
   };
 
   const handleSaveAdd = () => {
-    const newDelivery: FuelDelivery = {
+    const newDelivery: FuelDeliveryType = {
       id: `FD${String(deliveries.length + 1).padStart(3, '0')}`,
       branchSite: formData.branchSite || "",
       generator: formData.generator || "",
@@ -129,7 +107,7 @@ const FuelDelivery = () => {
     };
     const updated = [...deliveries, newDelivery];
     setDeliveries(updated);
-    localStorage.setItem("FUEL_DELIVERY_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveDeliveries(selectedFuelType, updated);
     setShowAddModal(false);
     toast.success("Fuel delivery logged successfully");
   };
@@ -140,7 +118,7 @@ const FuelDelivery = () => {
       d.id === selectedDelivery.id ? { ...d, ...formData } : d
     );
     setDeliveries(updated);
-    localStorage.setItem("FUEL_DELIVERY_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveDeliveries(selectedFuelType, updated);
     setShowEditModal(false);
     toast.success("Delivery updated successfully");
   };
@@ -151,7 +129,7 @@ const FuelDelivery = () => {
       d.id === selectedDelivery.id ? { ...d, escalationStatus: "pending" as const } : d
     );
     setDeliveries(updated);
-    localStorage.setItem("FUEL_DELIVERY_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveDeliveries(selectedFuelType, updated);
     setShowEscalateModal(false);
     toast.success("Escalation submitted successfully");
   };
@@ -492,7 +470,7 @@ const FuelDelivery = () => {
                   <CustomSelectDropdown
                     options={["matched", "short-supplied", "over-supplied"]}
                     value={formData.discrepancyStatus || "matched"}
-                    onChange={(value) => setFormData({ ...formData, discrepancyStatus: value as FuelDelivery["discrepancyStatus"] })}
+                    onChange={(value) => setFormData({ ...formData, discrepancyStatus: value as FuelDeliveryType["discrepancyStatus"] })}
                     placeholder="Select status"
                   />
                 </div>

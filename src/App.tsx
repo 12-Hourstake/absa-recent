@@ -30,6 +30,12 @@ import { PermissionProvider } from "@/contexts/PermissionContext";
 // Notification Components
 import { NotificationProvider } from "@/contexts/NotificationContext";
 
+// Document Components
+import { DocumentProvider } from "@/contexts/DocumentContext";
+
+// SLA Components
+import { SLAProvider } from "@/contexts/SLAContext";
+
 // Colleague and Vendor Account Components
 import { ColleagueProvider } from "@/contexts/ColleagueContext";
 import { VendorAccountProvider } from "@/contexts/VendorAccountContext";
@@ -280,7 +286,9 @@ const App = () => (
       <TooltipProvider>
         <UsersProvider>
           <AuthProvider>
-            <NotificationProvider>
+            <DocumentProvider>
+              <SLAProvider>
+                <NotificationProvider>
               <AssetProvider>
                 <UserManagementProvider>
                   <RequestProvider>
@@ -305,7 +313,9 @@ const App = () => (
                   </RequestProvider>
                 </UserManagementProvider>
               </AssetProvider>
-            </NotificationProvider>
+                </NotificationProvider>
+              </SLAProvider>
+            </DocumentProvider>
           </AuthProvider>
         </UsersProvider>
       </TooltipProvider>

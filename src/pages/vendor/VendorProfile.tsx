@@ -21,15 +21,23 @@ import {
   Star,
   Camera,
   Upload,
+  AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBackButtonText } from "@/hooks/useBackButtonText";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSLA } from "@/contexts/SLAContext";
 
 const VendorProfile = () => {
   const navigate = useNavigate();
   const backButtonText = useBackButtonText();
   const { user } = useAuth();
+  const { penalties } = useSLA();
+
+  // Calculate vendor penalties
+  const vendorPenalties = penalties.filter(p => p.vendor === user?.name);
+  const totalPenalties = vendorPenalties.reduce((sum, p) => sum + p.calculatedAmount, 0);
+  const pendingPenalties = vendorPenalties.filter(p => p.status === 'Pending Payment').length;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -410,6 +418,64 @@ const VendorProfile = () => {
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* SLA Penalties */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            SLA Penalties
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3 mb-6">
+            <div className="bg-red-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-red-600">
+                GH₵ {totalPenalties.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+              </div>
+              <p className="text-sm text-muted-foreground">Total Penalties</p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-yellow-600">{pendingPenalties}</div>
+              <p className="text-sm text-muted-foreground">Pending Payment</p>
+            </div>
+            <div className="bg-slate-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-slate-600">{vendorPenalties.length}</div>
+              <p className="text-sm text-muted-foreground">Total Breaches</p>
+            </div>
+          </div>
+          
+          {vendorPenalties.length > 0 ? (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Recent Penalties</h4>
+              {vendorPenalties.slice(0, 5).map((penalty) => (
+                <div key={penalty.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{penalty.slaType}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {penalty.createdAt.toLocaleDateString()} • {penalty.severityLevel}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-red-600">
+                      GH₵ {penalty.calculatedAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                    </p>
+                    <Badge className={penalty.status === 'Pending Payment' ? 'bg-yellow-100 text-yellow-800' : penalty.status === 'Invoice Sent' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                      {penalty.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <AlertTriangle className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+              <p>No SLA penalties recorded</p>
+              <p className="text-sm mt-1">Maintain excellent service to avoid penalties</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

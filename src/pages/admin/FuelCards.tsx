@@ -25,19 +25,7 @@ import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import { mockBranches } from "@/data/mockBranches";
 import { FuelTabs } from "@/components/ui/FuelTabs";
 import { FuelType, loadFuelContext, saveFuelContext } from "@/utils/fuelContext";
-
-interface FuelCard {
-  id: string;
-  cardNumber: string;
-  assignedBranch: string;
-  generatorName: string;
-  generatorId: string;
-  status: "in-safe" | "in-use" | "suspended";
-  lastUsedDate: string;
-  dualControl: boolean;
-  notes: string;
-  createdAt: string;
-}
+import { FuelDataManager, FuelCard } from "@/utils/fuelDataManager";
 
 const FuelCards = () => {
   // Fuel context state
@@ -77,40 +65,7 @@ const FuelCards = () => {
   };
 
   const loadFuelCards = () => {
-    const cached = localStorage.getItem("FUEL_CARDS_CACHE_V1");
-    if (cached) {
-      setFuelCards(JSON.parse(cached));
-    } else {
-      // Initialize with sample data
-      const sampleCards: FuelCard[] = [
-        {
-          id: "FC001",
-          cardNumber: "5432-1098-7654-3210",
-          assignedBranch: "Accra Main Branch",
-          generatorName: "Generator A1",
-          generatorId: "GEN-ACC-001",
-          status: "in-use",
-          lastUsedDate: "2024-01-15",
-          dualControl: true,
-          notes: "Primary backup generator",
-          createdAt: "2024-01-01"
-        },
-        {
-          id: "FC002",
-          cardNumber: "5432-1098-7654-3211",
-          assignedBranch: "Kumasi Branch",
-          generatorName: "Generator K1",
-          generatorId: "GEN-KUM-001",
-          status: "in-safe",
-          lastUsedDate: "2024-01-10",
-          dualControl: true,
-          notes: "Emergency generator",
-          createdAt: "2024-01-01"
-        }
-      ];
-      setFuelCards(sampleCards);
-      localStorage.setItem("FUEL_CARDS_CACHE_V1", JSON.stringify(sampleCards));
-    }
+    setFuelCards(FuelDataManager.getFuelCards(selectedFuelType));
   };
 
   const updateCardStatus = (cardId: string, newStatus: FuelCard["status"]) => {
@@ -118,7 +73,7 @@ const FuelCards = () => {
       card.id === cardId ? { ...card, status: newStatus } : card
     );
     setFuelCards(updatedCards);
-    localStorage.setItem("FUEL_CARDS_CACHE_V1", JSON.stringify(updatedCards));
+    FuelDataManager.saveFuelCards(selectedFuelType, updatedCards);
   };
 
   const handleAddCard = () => {
@@ -140,7 +95,7 @@ const FuelCards = () => {
     };
     const updated = [...fuelCards, newCard];
     setFuelCards(updated);
-    localStorage.setItem("FUEL_CARDS_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveFuelCards(selectedFuelType, updated);
     setSuccess("Fuel card added successfully");
     setShowAddModal(false);
     resetForm();
@@ -154,7 +109,7 @@ const FuelCards = () => {
     }
     const updated = fuelCards.map(c => c.id === selectedCard.id ? { ...c, ...formData } as FuelCard : c);
     setFuelCards(updated);
-    localStorage.setItem("FUEL_CARDS_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveFuelCards(selectedFuelType, updated);
     setSuccess("Fuel card updated successfully");
     setShowEditModal(false);
     setSelectedCard(null);
@@ -166,7 +121,7 @@ const FuelCards = () => {
     if (!selectedCard) return;
     const updated = fuelCards.filter(c => c.id !== selectedCard.id);
     setFuelCards(updated);
-    localStorage.setItem("FUEL_CARDS_CACHE_V1", JSON.stringify(updated));
+    FuelDataManager.saveFuelCards(selectedFuelType, updated);
     setSuccess("Fuel card deleted successfully");
     setShowDeleteModal(false);
     setSelectedCard(null);

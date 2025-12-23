@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Users, TrendingUp, Award, Trash2, Star, BarChart3, PieChart, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Plus, Users, TrendingUp, Award, Trash2, Star, BarChart3, PieChart, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 
 // Interfaces
 interface Vendor {
@@ -30,6 +30,11 @@ interface Vendor {
   contact: string;
   category: string;
   createdDate: string;
+  hasPortalAccess?: boolean;
+  email?: string;
+  phone?: string;
+  status?: 'active' | 'inactive';
+  services?: string[];
 }
 
 interface WorkOrder {
@@ -92,17 +97,17 @@ const FIXED_KPIS = [
 
 // Seed vendors data
 const SEED_VENDORS: Vendor[] = [
-  { id: "VEN-001", name: "JANITOR", contact: "janitor@services.com", category: "Cleaning", createdDate: "2023-01-15" },
-  { id: "VEN-002", name: "POWER", contact: "power@electrical.com", category: "Electrical", createdDate: "2023-01-20" },
-  { id: "VEN-003", name: "AC", contact: "ac@hvac.com", category: "HVAC", createdDate: "2023-02-01" },
-  { id: "VEN-004", name: "ELEVATOR", contact: "elevator@lifts.com", category: "Elevator", createdDate: "2023-02-10" },
-  { id: "VEN-005", name: "NSROMA", contact: "nsroma@services.com", category: "General", createdDate: "2023-02-15" },
-  { id: "VEN-006", name: "GYM", contact: "gym@equipment.com", category: "Fitness", createdDate: "2023-03-01" },
-  { id: "VEN-007", name: "MID ATLANTICS", contact: "midatlantic@marine.com", category: "Marine", createdDate: "2023-03-10" },
-  { id: "VEN-008", name: "AIR PURIFIERS", contact: "air@purifiers.com", category: "Air Quality", createdDate: "2023-03-15" },
-  { id: "VEN-009", name: "OUTDOOR", contact: "outdoor@landscaping.com", category: "Landscaping", createdDate: "2023-04-01" },
-  { id: "VEN-010", name: "TINO", contact: "tino@maintenance.com", category: "Maintenance", createdDate: "2023-04-10" },
-  { id: "VEN-011", name: "FUMIGATION", contact: "fumigation@pest.com", category: "Pest Control", createdDate: "2023-04-15" }
+  { id: "VEN-001", name: "JANITOR", contact: "janitor@services.com", email: "janitor@services.com", phone: "+233 24 123 4567", category: "Cleaning", createdDate: "2023-01-15", hasPortalAccess: true, status: "active", services: ["Office Cleaning", "Deep Cleaning"] },
+  { id: "VEN-002", name: "POWER", contact: "power@electrical.com", email: "power@electrical.com", phone: "+233 24 234 5678", category: "Electrical", createdDate: "2023-01-20", hasPortalAccess: true, status: "active", services: ["Electrical Installation", "Maintenance"] },
+  { id: "VEN-003", name: "AC", contact: "ac@hvac.com", email: "ac@hvac.com", phone: "+233 24 345 6789", category: "HVAC", createdDate: "2023-02-01", hasPortalAccess: false, status: "active", services: ["AC Installation", "HVAC Maintenance"] },
+  { id: "VEN-004", name: "ELEVATOR", contact: "elevator@lifts.com", email: "elevator@lifts.com", phone: "+233 24 456 7890", category: "Elevator", createdDate: "2023-02-10", hasPortalAccess: true, status: "active", services: ["Elevator Maintenance", "Lift Installation"] },
+  { id: "VEN-005", name: "NSROMA", contact: "nsroma@services.com", email: "nsroma@services.com", phone: "+233 24 567 8901", category: "General", createdDate: "2023-02-15", hasPortalAccess: false, status: "inactive", services: ["General Maintenance"] },
+  { id: "VEN-006", name: "GYM", contact: "gym@equipment.com", email: "gym@equipment.com", phone: "+233 24 678 9012", category: "Fitness", createdDate: "2023-03-01", hasPortalAccess: true, status: "active", services: ["Gym Equipment Maintenance"] },
+  { id: "VEN-007", name: "MID ATLANTICS", contact: "midatlantic@marine.com", email: "midatlantic@marine.com", phone: "+233 24 789 0123", category: "Marine", createdDate: "2023-03-10", hasPortalAccess: false, status: "active", services: ["Marine Equipment"] },
+  { id: "VEN-008", name: "AIR PURIFIERS", contact: "air@purifiers.com", email: "air@purifiers.com", phone: "+233 24 890 1234", category: "Air Quality", createdDate: "2023-03-15", hasPortalAccess: true, status: "active", services: ["Air Purification Systems"] },
+  { id: "VEN-009", name: "OUTDOOR", contact: "outdoor@landscaping.com", email: "outdoor@landscaping.com", phone: "+233 24 901 2345", category: "Landscaping", createdDate: "2023-04-01", hasPortalAccess: false, status: "active", services: ["Landscaping", "Garden Maintenance"] },
+  { id: "VEN-010", name: "TINO", contact: "tino@maintenance.com", email: "tino@maintenance.com", phone: "+233 24 012 3456", category: "Maintenance", createdDate: "2023-04-10", hasPortalAccess: true, status: "active", services: ["General Maintenance", "Repairs"] },
+  { id: "VEN-011", name: "FUMIGATION", contact: "fumigation@pest.com", email: "fumigation@pest.com", phone: "+233 24 123 4567", category: "Pest Control", createdDate: "2023-04-15", hasPortalAccess: false, status: "active", services: ["Pest Control", "Fumigation"] }
 ];
 
 const Vendors = () => {
@@ -113,6 +118,8 @@ const Vendors = () => {
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -316,6 +323,31 @@ const Vendors = () => {
     }
   };
 
+  const getPortalAccessBadge = (hasAccess: boolean) => {
+    return hasAccess ? (
+      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        Portal Access: Enabled
+      </Badge>
+    ) : (
+      <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">
+        Portal Access: Not Enabled
+      </Badge>
+    );
+  };
+
+  const getStatusBadge = (status: string) => {
+    return status === "active" ? (
+      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Active</Badge>
+    ) : (
+      <Badge variant="secondary">Inactive</Badge>
+    );
+  };
+
+  const handleViewVendor = (vendor: Vendor) => {
+    setSelectedVendor(vendor);
+    setIsViewDialogOpen(true);
+  };
+
   const handleVendorSelection = (vendorId: string) => {
     if (selectedVendors.includes(vendorId)) {
       setSelectedVendors(selectedVendors.filter(id => id !== vendorId));
@@ -458,13 +490,33 @@ const Vendors = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold">{performance.vendorName}</h3>
-                  <Badge className={getRatingColor(performance.overallRating)}>
-                    {performance.overallRating}
-                  </Badge>
+                  <div className="flex gap-1">
+                    <Badge className={getRatingColor(performance.overallRating)}>
+                      {performance.overallRating}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="space-y-1 text-sm text-muted-foreground">
+                <div className="space-y-1 text-sm text-muted-foreground mb-2">
                   <p>Total Score: {performance.totalScore}/15</p>
                   <p>Work Orders: {vendorStats.find(vs => vs.vendorId === performance.vendorId)?.totalWorkOrders || 0}</p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-1">
+                    {getPortalAccessBadge(vendors.find(v => v.id === performance.vendorId)?.hasPortalAccess || false)}
+                    {getStatusBadge(vendors.find(v => v.id === performance.vendorId)?.status || "active")}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const vendor = vendors.find(v => v.id === performance.vendorId);
+                      if (vendor) handleViewVendor(vendor);
+                    }}
+                    title="View Details"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
@@ -608,47 +660,68 @@ const Vendors = () => {
               <TableHeader className="sticky top-0 bg-muted/50">
                 <TableRow>
                   <TableHead className="text-sm">Vendor Name</TableHead>
-                  <TableHead className="text-sm">KPI 1: PPM Servicing</TableHead>
-                  <TableHead className="text-sm">KPI 2: SLA Compliance</TableHead>
-                  <TableHead className="text-sm">KPI 3: Maintenance Performance</TableHead>
-                  <TableHead className="text-sm">KPI 4: Stock Availability</TableHead>
-                  <TableHead className="text-sm">KPI 5: Monthly Reports</TableHead>
+                  <TableHead className="text-sm">Portal Access</TableHead>
+                  <TableHead className="text-sm">Status</TableHead>
+                  <TableHead className="text-sm">KPI 1: PPM</TableHead>
+                  <TableHead className="text-sm">KPI 2: SLA</TableHead>
+                  <TableHead className="text-sm">KPI 3: Maintenance</TableHead>
+                  <TableHead className="text-sm">KPI 4: Stock</TableHead>
+                  <TableHead className="text-sm">KPI 5: Reports</TableHead>
                   <TableHead className="text-sm">Total Score</TableHead>
                   <TableHead className="text-sm">Overall Rating</TableHead>
                   <TableHead className="text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vendorPerformances.map((performance) => (
-                  <TableRow key={performance.vendorId} className="hover:bg-muted/50">
-                    <TableCell className="text-sm font-medium">{performance.vendorName}</TableCell>
-                    {performance.kpis.map((kpi) => (
-                      <TableCell key={kpi.id} className="text-sm">
-                        <span className={`font-semibold ${getScoreColor(kpi.score)}`}>
-                          {kpi.score}/3
-                        </span>
+                {vendorPerformances.map((performance) => {
+                  const vendor = vendors.find(v => v.id === performance.vendorId);
+                  return (
+                    <TableRow key={performance.vendorId} className="hover:bg-muted/50">
+                      <TableCell className="text-sm font-medium">{performance.vendorName}</TableCell>
+                      <TableCell className="text-sm">
+                        {getPortalAccessBadge(vendor?.hasPortalAccess || false)}
                       </TableCell>
-                    ))}
-                    <TableCell className="text-sm font-bold">
-                      {performance.totalScore}/15
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getRatingColor(performance.overallRating)}>
-                        {performance.overallRating}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => setDeleteVendorId(performance.vendorId)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell className="text-sm">
+                        {getStatusBadge(vendor?.status || "active")}
+                      </TableCell>
+                      {performance.kpis.map((kpi) => (
+                        <TableCell key={kpi.id} className="text-sm">
+                          <span className={`font-semibold ${getScoreColor(kpi.score)}`}>
+                            {kpi.score}/3
+                          </span>
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-sm font-bold">
+                        {performance.totalScore}/15
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getRatingColor(performance.overallRating)}>
+                          {performance.overallRating}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => vendor && handleViewVendor(vendor)}
+                            title="View Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => setDeleteVendorId(performance.vendorId)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -743,6 +816,96 @@ const Vendors = () => {
             </Button>
             <Button onClick={handleAddVendor}>
               Add Vendor
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Vendor Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="w-[95%] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Vendor Details</DialogTitle>
+            <DialogDescription>
+              Complete information about this vendor and their portal access.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedVendor && (
+            <div className="grid gap-6 py-4">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Basic Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Vendor Name</Label>
+                    <div className="font-medium text-base">{selectedVendor.name}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Date Created</Label>
+                    <div className="font-medium">{new Date(selectedVendor.createdDate).toLocaleDateString('en-GB')}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Category</Label>
+                    <div className="font-medium">{selectedVendor.category}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Vendor Status</Label>
+                    <div className="font-medium capitalize">{selectedVendor.status || "active"}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Details */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Contact Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Email</Label>
+                    <div className="font-medium">{selectedVendor.email || selectedVendor.contact}</div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Phone</Label>
+                    <div className="font-medium">{selectedVendor.phone || "Not provided"}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Services & Portal Access */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Services & Access</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Assigned Services</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {selectedVendor.services?.map((service: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {service}
+                        </Badge>
+                      )) || (
+                        <Badge variant="outline" className="text-xs">
+                          {selectedVendor.category}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Portal Access Status</Label>
+                    <div className="mt-1">
+                      {getPortalAccessBadge(selectedVendor.hasPortalAccess || false)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedVendor.hasPortalAccess 
+                        ? "This vendor can access the vendor portal to view work orders and submit invoices."
+                        : "This vendor does not have portal access. Work orders are managed via phone/email."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button onClick={() => setIsViewDialogOpen(false)} className="w-full sm:w-auto">
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

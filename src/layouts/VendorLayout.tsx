@@ -37,6 +37,7 @@ import {
   Upload,
   BookOpen,
   HelpCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { UserRole } from "@/types/auth";
@@ -50,15 +51,9 @@ const VendorLayout = () => {
     { title: "Dashboard", url: "/vendor/dashboard", icon: LayoutDashboard },
     { title: "Work Orders", url: "/vendor/work-orders", icon: ClipboardList },
     { title: "Invoice Submission", url: "/vendor/invoice-submission", icon: Receipt },
-    { title: "Invoices", url: "/vendor/invoices", icon: FileText },
-    { title: "Availability Calendar", url: "/vendor/calendar", icon: Calendar },
-    { title: "Documents / Certificates", url: "/vendor/documents", icon: Upload },
-    { title: "Service Catalog", url: "/vendor/service-catalog", icon: BookOpen },
-    { title: "Contracts", url: "/vendor/contracts", icon: FileText },
-    { title: "Performance", url: "/vendor/reports", icon: TrendingUp },
+    { title: "SLA Penalties", url: "/vendor/sla-penalties", icon: AlertTriangle },
     { title: "Profile", url: "/vendor/profile", icon: User },
-    { title: "Support / Contact", url: "/vendor/support", icon: HelpCircle },
-    { title: "Tools", url: "/vendor/tools", icon: Wrench },
+    { title: "Support", url: "/vendor/support", icon: HelpCircle },
   ];
 
   const handleLogout = () => {

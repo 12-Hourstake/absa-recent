@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,117 +44,98 @@ import {
   UploadCloud
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDocuments } from "@/contexts/DocumentContext";
 
-interface Document {
-  id: string;
-  name: string;
-  category: string;
-  categoryColor: string;
-  uploadedBy: string;
-  uploadedAt: string;
-  associatedEntity: string;
-  entityLink?: boolean;
-}
 
-const mockDocuments: Document[] = [
-  {
-    id: "DOC-001",
-    name: "Asokwa Property Tenancy Agreement Final.pdf",
-    category: "Legal",
-    categoryColor: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200",
-    uploadedBy: "Ama Serwaa",
-    uploadedAt: "24 Aug 2024, 10:30 AM",
-    associatedEntity: "Property P0123",
-    entityLink: true,
-  },
-  {
-    id: "DOC-002",
-    name: "HR Policy 2024.docx",
-    category: "HR",
-    categoryColor: "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200",
-    uploadedBy: "Kofi Mensah",
-    uploadedAt: "23 Aug 2024, 02:15 PM",
-    associatedEntity: "System Wide",
-  },
-  {
-    id: "DOC-003",
-    name: "Annual Financial Report - GHS.csv",
-    category: "Financial",
-    categoryColor: "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
-    uploadedBy: "Ama Serwaa",
-    uploadedAt: "22 Aug 2024, 09:00 AM",
-    associatedEntity: "System Wide",
-  },
-  {
-    id: "DOC-004",
-    name: "Invoice_July_2024.jpeg",
-    category: "Financial",
-    categoryColor: "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
-    uploadedBy: "Kwame Nkrumah",
-    uploadedAt: "21 Aug 2024, 11:45 AM",
-    associatedEntity: "Tenant T456",
-    entityLink: true,
-  },
-  {
-    id: "DOC-005",
-    name: "Operations Manual v3.pdf",
-    category: "Operations",
-    categoryColor: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
-    uploadedBy: "Kofi Mensah",
-    uploadedAt: "20 Aug 2024, 05:00 PM",
-    associatedEntity: "System Wide",
-  },
-  {
-    id: "DOC-006",
-    name: "Maintenance Schedule Q4 2024.xlsx",
-    category: "Operations",
-    categoryColor: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
-    uploadedBy: "Yaw Boateng",
-    uploadedAt: "19 Aug 2024, 03:30 PM",
-    associatedEntity: "All Properties",
-  },
-  {
-    id: "DOC-007",
-    name: "Vendor Contract - CleanCo Ghana.pdf",
-    category: "Legal",
-    categoryColor: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200",
-    uploadedBy: "Esi Tetteh",
-    uploadedAt: "18 Aug 2024, 10:00 AM",
-    associatedEntity: "Vendor V789",
-    entityLink: true,
-  },
-];
 
 const Documents = () => {
+  const { documents, addDocument, removeDocument } = useDocuments();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState("Category");
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: "",
+    category: "",
+    associatedEntity: "",
+    file: null as File | null
+  });
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      'Legal': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
+      'Financial': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
+      'Operations': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200',
+      'HR': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200',
+      'Technical': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',
+      'Administrative': 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200'
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200';
+  };
+
+  const handleFileUpload = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    setUploadForm(prev => ({ ...prev, file, title: file.name }));
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    handleFileUpload(e.dataTransfer.files);
+    setShowUploadModal(true);
+  }, [handleFileUpload]);
 
   const handleUploadDocument = () => {
-    console.log('Uploading document');
+    if (!uploadForm.file || !uploadForm.title || !uploadForm.category) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const fileExtension = uploadForm.file.name.split('.').pop()?.toLowerCase() || '';
+    const fileSize = (uploadForm.file.size / 1024 / 1024).toFixed(2) + ' MB';
+
+    addDocument({
+      name: uploadForm.title,
+      fileType: fileExtension,
+      category: uploadForm.category,
+      uploadedBy: "Current User",
+      associatedEntity: uploadForm.associatedEntity || "System Wide",
+      fileSize,
+      sourceModule: "Documents",
+      file: uploadForm.file
+    });
+
+    setUploadForm({ title: "", category: "", associatedEntity: "", file: null });
     setShowUploadModal(false);
     toast.success("Document uploaded successfully!");
   };
 
-  const filteredDocuments = mockDocuments.filter((doc) =>
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDocuments = documents.filter((doc) =>
+    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.uploadedBy.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleUpload = () => {
-    toast.success("Upload dialog opened");
+    setShowUploadModal(true);
   };
 
-  const handleDownload = (doc: Document) => {
+  const handleDownload = (doc: any) => {
     toast.success(`Downloading ${doc.name}`);
   };
 
-  const handleView = (doc: Document) => {
+  const handleView = (doc: any) => {
     toast.info(`Viewing ${doc.name}`);
   };
 
-  const handleDelete = (doc: Document) => {
-    toast.error(`Document ${doc.name} deleted`);
+  const handleDelete = (doc: any) => {
+    removeDocument(doc.id);
+    toast.success(`Document ${doc.name} deleted`);
   };
 
   return (
@@ -164,7 +145,7 @@ const Documents = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Documents Library</h1>
           <p className="text-muted-foreground mt-1">
-            Manage and organize all property-related documents
+            System-wide document repository - all uploaded files appear here
           </p>
         </div>
         <Button onClick={() => setShowUploadModal(true)} className="bg-primary hover:bg-primary/90">
@@ -235,6 +216,8 @@ const Documents = () => {
           {/* Drag and Drop Zone */}
           <div
             onClick={handleUpload}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
             className="border-2 border-dashed border-border rounded-xl p-8 text-center bg-card hover:border-primary transition-colors cursor-pointer group"
           >
             <div className="flex flex-col items-center gap-4">
@@ -245,7 +228,7 @@ const Documents = () => {
                   <span className="text-primary font-bold">browse to upload</span>
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Allowed file types: pdf, docx, jpeg, csv, xlsx
+                  All file types supported - documents will be visible system-wide
                 </p>
               </div>
             </div>
@@ -267,62 +250,77 @@ const Documents = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredDocuments.map((doc) => (
-                      <TableRow key={doc.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-primary" />
-                          {doc.name}
+                    {filteredDocuments.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <div className="flex flex-col items-center gap-3">
+                            <FileText className="h-12 w-12 text-muted-foreground" />
+                            <div>
+                              <p className="text-lg font-medium text-muted-foreground">No documents available</p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Uploaded documents across the system will appear here
+                              </p>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={doc.categoryColor}>
-                            {doc.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {doc.uploadedBy}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {doc.uploadedAt}
-                        </TableCell>
-                        <TableCell>
-                          {doc.entityLink ? (
-                            <span className="text-primary hover:underline cursor-pointer">
-                              {doc.associatedEntity}
-                            </span>
-                          ) : (
+                      </TableRow>
+                    ) : (
+                      filteredDocuments.map((doc) => (
+                        <TableRow key={doc.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-primary" />
+                            {doc.name}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className={getCategoryColor(doc.category)}>
+                              {doc.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {doc.uploadedBy}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {doc.uploadedAt.toLocaleDateString()} {doc.uploadedAt.toLocaleTimeString()}
+                          </TableCell>
+                          <TableCell>
                             <span className="text-muted-foreground">
                               {doc.associatedEntity}
                             </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-popover">
-                              <DropdownMenuItem onClick={() => handleView(doc)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                                <Download className="h-4 w-4 mr-2" />
-                                Download
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDelete(doc)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            {doc.sourceModule && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                from {doc.sourceModule}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-popover">
+                                <DropdownMenuItem onClick={() => handleView(doc)}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDownload(doc)}>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDelete(doc)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -414,12 +412,14 @@ const Documents = () => {
                 {/* Document Title */}
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-900 dark:text-white text-sm font-medium">
-                    Document Title
+                    Document Title *
                   </label>
                   <input 
                     className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 h-12 px-4 placeholder:text-slate-500 transition-colors"
                     placeholder="e.g. Tenancy Agreement - Kwame Nkrumah"
                     type="text"
+                    value={uploadForm.title}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                   />
                 </div>
 
@@ -427,95 +427,58 @@ const Documents = () => {
                   {/* Category */}
                   <div className="flex flex-col gap-2">
                     <label className="text-slate-900 dark:text-white text-sm font-medium">
-                      Category
+                      Category *
                     </label>
-                    <Select>
+                    <Select value={uploadForm.category} onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger className="h-12">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="legal">Legal</SelectItem>
-                        <SelectItem value="financial">Financial</SelectItem>
-                        <SelectItem value="technical">Technical</SelectItem>
-                        <SelectItem value="administrative">Administrative</SelectItem>
+                        <SelectItem value="Legal">Legal</SelectItem>
+                        <SelectItem value="Financial">Financial</SelectItem>
+                        <SelectItem value="Technical">Technical</SelectItem>
+                        <SelectItem value="Administrative">Administrative</SelectItem>
+                        <SelectItem value="Operations">Operations</SelectItem>
+                        <SelectItem value="HR">HR</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  {/* Document Type */}
+                  {/* File Upload */}
                   <div className="flex flex-col gap-2">
                     <label className="text-slate-900 dark:text-white text-sm font-medium">
-                      Document Type
+                      File *
                     </label>
-                    <Select defaultValue="contract">
-                      <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="contract">Contract</SelectItem>
-                        <SelectItem value="invoice">Invoice</SelectItem>
-                        <SelectItem value="report">Report</SelectItem>
-                        <SelectItem value="certificate">Certificate</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Associated Entity */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-slate-900 dark:text-white text-sm font-medium">
-                      Associated Entity
-                    </label>
-                    <div className="relative group">
-                      <Search className="absolute inset-y-0 left-0 flex items-center pl-3 h-5 w-5 text-slate-500 dark:text-slate-400 group-focus-within:text-slate-700 dark:group-focus-within:text-slate-300 transition-colors" />
-                      <input 
-                        className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 h-12 pl-10 pr-4 placeholder:text-slate-500 transition-colors"
-                        placeholder="Search property, tenant, asset..."
-                        type="text"
-                        defaultValue="Osu Castle Apartments"
-                      />
-                    </div>
-                  </div>
-                  {/* Expiry Date */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-slate-900 dark:text-white text-sm font-medium">
-                      Expiry Date <span className="text-slate-500 dark:text-slate-400 font-normal">(Optional)</span>
-                    </label>
-                    <input 
-                      className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 h-12 px-4 text-sm"
-                      type="date"
+                    <input
+                      type="file"
+                      className="w-full h-12 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"
+                      onChange={(e) => handleFileUpload(e.target.files)}
                     />
                   </div>
                 </div>
 
-                {/* Tags */}
+                {/* Associated Entity */}
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-900 dark:text-white text-sm font-medium">
-                    Tags
+                    Associated Entity
                   </label>
-                  <div className="w-full min-h-[48px] rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-200 dark:focus-within:ring-slate-700 transition-colors flex flex-wrap items-center gap-2 p-2">
-                    {/* Tag 1 */}
-                    <span className="inline-flex items-center gap-1 rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-sm font-medium text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
-                      #urgent
-                      <button className="ml-1 rounded-full p-0.5 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300">
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                    {/* Tag 2 */}
-                    <span className="inline-flex items-center gap-1 rounded bg-red-100 dark:bg-red-900/30 px-2 py-1 text-sm font-medium text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
-                      #legal
-                      <button className="ml-1 rounded-full p-0.5 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300">
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                    <input 
-                      className="flex-1 bg-transparent border-none focus:ring-0 p-1 text-sm text-slate-900 dark:text-white placeholder:text-slate-500 min-w-[100px]"
-                      placeholder="Add tags..."
-                      type="text"
-                    />
-                  </div>
+                  <input 
+                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 h-12 px-4 placeholder:text-slate-500 transition-colors"
+                    placeholder="e.g. Property, Asset, Request ID..."
+                    type="text"
+                    value={uploadForm.associatedEntity}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, associatedEntity: e.target.value }))}
+                  />
                 </div>
+
+                {uploadForm.file && (
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">Selected File:</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{uploadForm.file.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500">
+                      {(uploadForm.file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                )}
               </form>
             </div>
 

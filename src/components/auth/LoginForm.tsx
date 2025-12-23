@@ -108,25 +108,25 @@ const LoginForm = () => {
   const handleAutoLogin = async (portalType: Portal) => {
     setIsSubmitting(true);
     try {
-      let role, portal;
-      if (portalType === "admin") {
-        role = "FACILITY_MANAGER";
-        portal = "admin";
-      } else if (portalType === "vendor") {
-        role = "VENDOR_ADMIN";
-        portal = "vendor";
-      }
-
-      await login({ email: "auto@login.com", password: "auto", portal });
-      
-      if (portal === "admin") {
-        navigate("/admin/dashboard");
-      } else if (portal === "vendor") {
-        navigate("/vendor/dashboard");
+      if (portalType === "vendor") {
+        // Use the AuthContext login function with auto-login credentials
+        await login({
+          email: "auto@login.com",
+          password: "auto",
+          portal: "vendor"
+        });
+        window.location.href = "/vendor/dashboard";
+      } else if (portalType === "admin") {
+        // Use the AuthContext login function with auto-login credentials
+        await login({
+          email: "auto@login.com",
+          password: "auto",
+          portal: "admin"
+        });
+        window.location.href = "/admin/dashboard";
       }
     } catch (err) {
       console.error("Auto-login error:", err);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -435,10 +435,9 @@ const LoginForm = () => {
                   }`}
                   onClick={() => {
                     if (isSubmitting) return;
+                    selectPortal(validator.portal);
                     if (validator.portal === "admin" || validator.portal === "vendor") {
                       handleAutoLogin(validator.portal);
-                    } else {
-                      selectPortal(validator.portal);
                     }
                   }}
                 >

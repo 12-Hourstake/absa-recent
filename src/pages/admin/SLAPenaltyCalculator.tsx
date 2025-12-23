@@ -10,8 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calculator, RotateCcw, FileText, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Calculator, RotateCcw, FileText, AlertCircle, Send, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useSLA } from "@/contexts/SLAContext";
 
 interface CalculationResult {
   baseRate: number;
@@ -22,28 +24,29 @@ interface CalculationResult {
 }
 
 const SLAPenaltyCalculator = () => {
+  const { penalties, addPenalty, updatePenaltyStatus } = useSLA();
   const [slaType, setSlaType] = useState("");
   const [severityLevel, setSeverityLevel] = useState("");
+  const [vendor, setVendor] = useState("");
   const [breachDuration, setBreachDuration] = useState("10");
-  const [contractId] = useState("ABSA-KUM-0451");
+  const [breachStartDate, setBreachStartDate] = useState("");
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const calculatePenalty = () => {
-    if (!slaType || !severityLevel || !breachDuration) {
+    if (!slaType || !severityLevel || !breachDuration || !vendor) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     setIsCalculating(true);
 
-    // Simulate calculation delay
     setTimeout(() => {
       const baseRates: Record<string, number> = {
-        maintenance: 500,
-        uptime: 750,
-        cleaning: 300,
-        security: 600,
+        "Maintenance Response": 500,
+        "Facility Uptime": 750,
+        "Cleaning Services": 300,
+        "Security Services": 600,
       };
 
       const multipliers: Record<string, number> = {
@@ -69,16 +72,52 @@ const SLAPenaltyCalculator = () => {
         totalPenalty,
       });
 
+      // Add penalty to global store
+      addPenalty({
+        slaType,
+        severityLevel,
+        vendor,
+        breachDuration: hours,
+        breachStartDate: breachStartDate ? new Date(breachStartDate) : undefined,
+        calculatedAmount: totalPenalty,
+        status: 'Pending Payment'
+      });
+
       setIsCalculating(false);
-      toast.success("Penalty calculated successfully");
+      toast.success("Penalty calculated and saved successfully");
     }, 500);
   };
 
   const resetForm = () => {
     setSlaType("");
     setSeverityLevel("");
+    setVendor("");
     setBreachDuration("10");
+    setBreachStartDate("");
     setResult(null);
+  };
+
+  const handleSendInvoice = (penaltyId: string) => {
+    updatePenaltyStatus(penaltyId, 'Invoice Sent');
+    toast.success("Invoice sent to vendor");
+  };
+
+  const handleMarkCompleted = (penaltyId: string) => {
+    updatePenaltyStatus(penaltyId, 'Completed');
+    toast.success("Penalty marked as completed");
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Pending Payment':
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending Payment</Badge>;
+      case 'Invoice Sent':
+        return <Badge className="bg-blue-100 text-blue-800">Invoice Sent</Badge>;
+      case 'Completed':
+        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
   };
 
   const getSeverityLabel = (level: string, multiplier: number) => {
@@ -113,10 +152,10 @@ const SLAPenaltyCalculator = () => {
                   <SelectValue placeholder="Select SLA Type" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover">
-                  <SelectItem value="maintenance">Maintenance Response Time</SelectItem>
-                  <SelectItem value="uptime">Facility Uptime</SelectItem>
-                  <SelectItem value="cleaning">Cleaning Services</SelectItem>
-                  <SelectItem value="security">Security Services</SelectItem>
+                  <SelectItem value="Maintenance Response">Maintenance Response</SelectItem>
+                  <SelectItem value="Facility Uptime">Facility Uptime</SelectItem>
+                  <SelectItem value="Cleaning Services">Cleaning Services</SelectItem>
+                  <SelectItem value="Security Services">Security Services</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -136,6 +175,21 @@ const SLAPenaltyCalculator = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="vendor">Vendor</Label>
+              <Select value={vendor} onValueChange={setVendor}>
+                <SelectTrigger id="vendor">
+                  <SelectValue placeholder="Select Vendor" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="CleanCo Ghana Ltd">CleanCo Ghana Ltd</SelectItem>
+                  <SelectItem value="SecureGuard Services">SecureGuard Services</SelectItem>
+                  <SelectItem value="TechMaint Solutions">TechMaint Solutions</SelectItem>
+                  <SelectItem value="FacilityPro Ghana">FacilityPro Ghana</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="breach-duration">Breach Duration (Hours)</Label>
               <Input
                 id="breach-duration"
@@ -148,12 +202,12 @@ const SLAPenaltyCalculator = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contract-id">Contract ID</Label>
+              <Label htmlFor="breach-start-date">Breach Start Date (Optional)</Label>
               <Input
-                id="contract-id"
-                value={contractId}
-                readOnly
-                className="bg-muted cursor-not-allowed"
+                id="breach-start-date"
+                type="date"
+                value={breachStartDate}
+                onChange={(e) => setBreachStartDate(e.target.value)}
               />
             </div>
 
@@ -237,7 +291,7 @@ const SLAPenaltyCalculator = () => {
                   <div>
                     <p className="text-sm font-medium">Penalty Notice</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      This penalty will be applied to Contract {contractId}. The vendor will be
+                      This penalty will be applied to the selected vendor. The vendor will be
                       notified automatically upon confirmation.
                     </p>
                   </div>
@@ -295,6 +349,76 @@ const SLAPenaltyCalculator = () => {
               <p className="text-sm text-muted-foreground">Base rate per breach</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Penalty History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Penalty History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {penalties.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-lg font-medium text-muted-foreground">No penalties calculated yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Calculated penalties will appear here for tracking and invoicing
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="p-4 text-left text-xs font-medium uppercase tracking-wider">Penalty ID</th>
+                    <th className="p-4 text-left text-xs font-medium uppercase tracking-wider">SLA Type</th>
+                    <th className="p-4 text-left text-xs font-medium uppercase tracking-wider">Vendor</th>
+                    <th className="p-4 text-right text-xs font-medium uppercase tracking-wider">Amount (GHS)</th>
+                    <th className="p-4 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                    <th className="p-4 text-left text-xs font-medium uppercase tracking-wider">Created Date</th>
+                    <th className="p-4 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {penalties.map((penalty) => (
+                    <tr key={penalty.id} className="hover:bg-muted/50">
+                      <td className="p-4 font-mono text-sm">{penalty.id.split('-').slice(-2).join('-')}</td>
+                      <td className="p-4 text-sm">{penalty.slaType}</td>
+                      <td className="p-4 text-sm">{penalty.vendor}</td>
+                      <td className="p-4 text-right font-medium">{penalty.calculatedAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</td>
+                      <td className="p-4">{getStatusBadge(penalty.status)}</td>
+                      <td className="p-4 text-sm">{penalty.createdAt.toLocaleDateString()}</td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {penalty.status === 'Pending Payment' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleSendInvoice(penalty.id)}
+                              className="gap-1"
+                            >
+                              <Send className="h-3 w-3" />
+                              Send Invoice
+                            </Button>
+                          )}
+                          {penalty.status === 'Invoice Sent' && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleMarkCompleted(penalty.id)}
+                              className="gap-1 bg-green-600 hover:bg-green-700"
+                            >
+                              Mark Completed
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

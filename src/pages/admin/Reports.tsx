@@ -281,21 +281,24 @@ const Reports = () => {
     setTimeout(() => setSuccess(""), 3000);
   };
 
-  const generateUtilityPurchaseReport = (format: string) => {
-    const logs = loadCachedData(CACHE_KEYS.LOGS);
-    const reportData = logs.map((log: any) => ({
-      "Utility Type": log.utilityType || log.type,
-      "Meter Number": log.meterNumber || log.meterId,
-      "Quantity/Amount": log.quantity || log.amount,
-      "Branch": log.branch || log.location,
-      "Logged Date": log.loggedDate || log.createdAt
+  const generateSLAPenaltyReport = (format: string) => {
+    const penalties = loadCachedData(CACHE_KEYS.SLA).penalties || [];
+    const reportData = penalties.map((penalty: any) => ({
+      "Penalty ID": penalty.id.split('-').slice(-2).join('-'),
+      "SLA Type": penalty.slaType,
+      "Vendor": penalty.vendor,
+      "Severity": penalty.severityLevel,
+      "Amount (GHS)": penalty.calculatedAmount.toFixed(2),
+      "Status": penalty.status,
+      "Created Date": penalty.createdAt ? new Date(penalty.createdAt).toLocaleDateString() : "N/A",
+      "Breach Duration (hrs)": penalty.breachDuration
     }));
 
-    const reportName = "Utility Purchase Report";
+    const reportName = "SLA Penalty Report";
     if (format === "csv") {
-      exportToCSV(reportData, "Utility_Purchase_Report");
+      exportToCSV(reportData, "SLA_Penalty_Report");
     } else {
-      exportToPDF(reportData, reportName, "Utility_Purchase_Report");
+      exportToPDF(reportData, reportName, "SLA_Penalty_Report");
     }
 
     saveRecentReport({
@@ -460,7 +463,7 @@ const Reports = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Available Templates</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">6</div>
+            <div className="text-2xl font-bold">7</div>
           </CardContent>
         </Card>
         <Card>
@@ -547,6 +550,24 @@ const Reports = () => {
                   PDF
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => generateUtilityPurchaseReport("csv")}>
+                  <FileSpreadsheet className="h-4 w-4 mr-1" />
+                  CSV
+                </Button>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-red-600" />
+                <h3 className="font-semibold">SLA Penalty Report</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Vendor penalties, breach tracking, and compliance status</p>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => generateSLAPenaltyReport("pdf")}>
+                  <FileImage className="h-4 w-4 mr-1" />
+                  PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => generateSLAPenaltyReport("csv")}>
                   <FileSpreadsheet className="h-4 w-4 mr-1" />
                   CSV
                 </Button>
@@ -699,6 +720,7 @@ const Reports = () => {
                   <SelectItem value="asset-inventory">Asset Inventory</SelectItem>
                   <SelectItem value="maintenance-compliance">Maintenance Compliance</SelectItem>
                   <SelectItem value="utility-purchase">Utility Purchase</SelectItem>
+                  <SelectItem value="sla-penalty">SLA Penalty Report</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,11 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Search, Eye, Edit, Trash2, X, FileText } from "lucide-react";
+import { Download, Search, Eye, FileText, X } from "lucide-react";
 import { useState } from "react";
 import CustomSelectDropdown from "@/components/ui/CustomSelectDropdown";
+import { useSLA } from "@/contexts/SLAContext";
 
 const SLABreaches = () => {
+  const { breaches } = useSLA();
   const [branchFilter, setBranchFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -14,13 +16,16 @@ const SLABreaches = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedBreach, setSelectedBreach] = useState<any>(null);
-  const breaches = [
-    { id: "TKT-2024-00123", branch: "Villaggio Vista", type: "Plumbing Emergency", breachDate: "15 Aug 2024", resolutionDate: "16 Aug 2024", status: "Resolved" },
-    { id: "TKT-2024-00124", branch: "Trassaco Valley Homes", type: "Electrical Fault", breachDate: "17 Aug 2024", resolutionDate: "-", status: "Pending Action" },
-    { id: "TKT-2024-00125", branch: "Osu Apartments", type: "HVAC Repair", breachDate: "18 Aug 2024", resolutionDate: "18 Aug 2024", status: "Resolved" },
-    { id: "TKT-2024-00126", branch: "Villaggio Vista", type: "Plumbing Emergency", breachDate: "19 Aug 2024", resolutionDate: "-", status: "Pending Action" },
-    { id: "TKT-2024-00127", branch: "Trassaco Valley Homes", type: "Electrical Fault", breachDate: "20 Aug 2024", resolutionDate: "21 Aug 2024", status: "Resolved" },
-  ];
+  const filteredBreaches = breaches.filter(breach => {
+    const matchesSearch = breach.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         breach.branch.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesBranch = branchFilter === "all" || breach.branch.toLowerCase().includes(branchFilter);
+    const matchesType = typeFilter === "all" || breach.slaType.toLowerCase().includes(typeFilter);
+    const matchesStatus = statusFilter === "all" || 
+                         (statusFilter === "resolved" && breach.status === "Resolved") ||
+                         (statusFilter === "pending" && breach.status === "Pending Action");
+    return matchesSearch && matchesBranch && matchesType && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -116,47 +121,51 @@ const SLABreaches = () => {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {breaches.map((breach) => (
-                  <tr key={breach.id} className="hover:bg-muted/50">
-                    <td className="p-4 font-medium text-sm">{breach.id}</td>
-                    <td className="p-4 text-sm font-medium">{breach.branch}</td>
-                    <td className="p-4 text-sm">{breach.type}</td>
-                    <td className="p-4 text-sm">{breach.breachDate}</td>
-                    <td className="p-4 text-sm">{breach.resolutionDate}</td>
-                    <td className="p-4">
-                      <Badge 
-                        className={breach.status === "Resolved" 
-                          ? "bg-green-100 text-green-700 hover:bg-green-100" 
-                          : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                        }
-                      >
-                        {breach.status}
-                      </Badge>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          onClick={() => { setSelectedBreach(breach); setShowViewModal(true); }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          onClick={() => { setSelectedBreach(breach); setShowEditModal(true); }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          onClick={() => { setSelectedBreach(breach); setShowReportModal(true); }}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </button>
+                {filteredBreaches.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <FileText className="h-12 w-12 text-muted-foreground" />
+                        <div>
+                          <p className="text-lg font-medium text-muted-foreground">No SLA breaches recorded</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            All active SLAs are currently within limits
+                          </p>
+                        </div>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredBreaches.map((breach) => (
+                    <tr key={breach.id} className="hover:bg-muted/50">
+                      <td className="p-4 font-medium text-sm">{breach.ticketId}</td>
+                      <td className="p-4 text-sm font-medium">{breach.branch}</td>
+                      <td className="p-4 text-sm">{breach.slaType}</td>
+                      <td className="p-4 text-sm">{breach.breachDate.toLocaleDateString()}</td>
+                      <td className="p-4 text-sm">{breach.resolutionDate ? breach.resolutionDate.toLocaleDateString() : "-"}</td>
+                      <td className="p-4">
+                        <Badge 
+                          className={breach.status === "Resolved" 
+                            ? "bg-green-100 text-green-700 hover:bg-green-100" 
+                            : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                          }
+                        >
+                          {breach.status}
+                        </Badge>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            onClick={() => { setSelectedBreach(breach); setShowViewModal(true); }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -166,7 +175,7 @@ const SLABreaches = () => {
       <div className="flex items-center justify-between p-4">
         <div className="hidden sm:block">
           <p className="text-sm text-slate-600">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of <span className="font-medium">20</span> results
+            Showing <span className="font-medium">{Math.min(filteredBreaches.length, 10)}</span> of <span className="font-medium">{filteredBreaches.length}</span> results
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -205,24 +214,27 @@ const SLABreaches = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium text-slate-600">Ticket ID:</span>
-                  <p className="text-slate-900">{selectedBreach.id}</p>
+                  <p className="text-slate-900">{selectedBreach.ticketId}</p>
                 </div>
                 <div>
                   <span className="font-medium text-slate-600">Branch:</span>
                   <p className="text-slate-900">{selectedBreach.branch}</p>
                 </div>
-
                 <div>
                   <span className="font-medium text-slate-600">SLA Type:</span>
-                  <p className="text-slate-900">{selectedBreach.type}</p>
+                  <p className="text-slate-900">{selectedBreach.slaType}</p>
                 </div>
                 <div>
                   <span className="font-medium text-slate-600">Breach Date:</span>
-                  <p className="text-slate-900">{selectedBreach.breachDate}</p>
+                  <p className="text-slate-900">{selectedBreach.breachDate.toLocaleDateString()}</p>
                 </div>
                 <div>
                   <span className="font-medium text-slate-600">Resolution Date:</span>
-                  <p className="text-slate-900">{selectedBreach.resolutionDate}</p>
+                  <p className="text-slate-900">{selectedBreach.resolutionDate ? selectedBreach.resolutionDate.toLocaleDateString() : "Not resolved"}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-slate-600">Related Entity:</span>
+                  <p className="text-slate-900">{selectedBreach.relatedEntity}</p>
                 </div>
               </div>
               <div>

@@ -26,6 +26,13 @@ import CustomSelectDropdown from "@/components/ui/CustomSelectDropdown";
 import { FuelTabs } from "@/components/ui/FuelTabs";
 import { FuelType, loadFuelContext, saveFuelContext } from "@/utils/fuelContext";
 import { 
+  FuelDataManager,
+  FuelLevelLog,
+  FuelReorderRequest,
+  FuelCard,
+  FuelDelivery
+} from "@/utils/fuelDataManager";
+import { 
   Plus, 
   Fuel, 
   AlertTriangle, 
@@ -39,68 +46,6 @@ import {
   TrendingUp,
   Zap
 } from "lucide-react";
-
-// Interfaces
-interface FuelLevelLog {
-  id: string;
-  dateTime: string;
-  branchSite: string;
-  generatorId: string;
-  generatorName: string;
-  recordedFuelLevel: number;
-  minimumRequiredLevel: number;
-  reorderRequired: boolean;
-  recordedBy: string;
-  notes?: string;
-  createdDate: string;
-}
-
-interface FuelReorderRequest {
-  id: string;
-  branchSite: string;
-  generatorId: string;
-  generatorName: string;
-  currentFuelLevel: number;
-  requestedQuantity: number;
-  requestReason: string;
-  requestDate: string;
-  status: 'Pending Approval' | 'Approved' | 'Corrections Required' | 'Rejected';
-  approvedBy?: string;
-  approvalDate?: string;
-  corrections?: string;
-  createdDate: string;
-}
-
-interface FuelCard {
-  id: string;
-  cardId: string;
-  assignedSite: string;
-  status: 'In Safe' | 'In Use';
-  lastUsedDate?: string;
-  pinControlStatus: 'Secured' | 'Released';
-  createdDate: string;
-}
-
-interface FuelDelivery {
-  id: string;
-  reorderReference: string;
-  oilMarketingCompany: string;
-  quantityApproved: number;
-  quantityDelivered: number;
-  tankLevelBefore: number;
-  tankLevelAfter: number;
-  discrepancy: boolean;
-  escalationStatus?: string;
-  deliveryDate: string;
-  createdDate: string;
-}
-
-// Storage keys
-const GENERATOR_FUEL_LEVEL_STORAGE_KEY = "GENERATOR_FUEL_LEVEL_CACHE_V1";
-const FUEL_REORDER_STORAGE_KEY = "FUEL_REORDER_CACHE_V1";
-const FUEL_CARDS_STORAGE_KEY = "FUEL_CARDS_CACHE_V1";
-const FUEL_DELIVERY_STORAGE_KEY = "FUEL_DELIVERY_CACHE_V1";
-const BRANCHES_STORAGE_KEY = "BRANCHES_CACHE_V1";
 
 const FuelDashboard = () => {
   // Fuel context state
@@ -155,56 +100,16 @@ const FuelDashboard = () => {
   };
 
   const loadAllData = () => {
-    loadFuelLogs();
-    loadReorderRequests();
-    loadFuelCards();
-    loadDeliveries();
+    setFuelLogs(FuelDataManager.getFuelLogs(selectedFuelType));
+    setReorderRequests(FuelDataManager.getReorderRequests(selectedFuelType));
+    setFuelCards(FuelDataManager.getFuelCards(selectedFuelType));
+    setDeliveries(FuelDataManager.getDeliveries(selectedFuelType));
     loadBranches();
-  };
-
-  const loadFuelLogs = () => {
-    try {
-      const cached = localStorage.getItem(GENERATOR_FUEL_LEVEL_STORAGE_KEY);
-      setFuelLogs(cached ? JSON.parse(cached) : []);
-    } catch (err) {
-      console.error("Error loading fuel logs:", err);
-      setFuelLogs([]);
-    }
-  };
-
-  const loadReorderRequests = () => {
-    try {
-      const cached = localStorage.getItem(FUEL_REORDER_STORAGE_KEY);
-      setReorderRequests(cached ? JSON.parse(cached) : []);
-    } catch (err) {
-      console.error("Error loading reorder requests:", err);
-      setReorderRequests([]);
-    }
-  };
-
-  const loadFuelCards = () => {
-    try {
-      const cached = localStorage.getItem(FUEL_CARDS_STORAGE_KEY);
-      setFuelCards(cached ? JSON.parse(cached) : []);
-    } catch (err) {
-      console.error("Error loading fuel cards:", err);
-      setFuelCards([]);
-    }
-  };
-
-  const loadDeliveries = () => {
-    try {
-      const cached = localStorage.getItem(FUEL_DELIVERY_STORAGE_KEY);
-      setDeliveries(cached ? JSON.parse(cached) : []);
-    } catch (err) {
-      console.error("Error loading deliveries:", err);
-      setDeliveries([]);
-    }
   };
 
   const loadBranches = () => {
     try {
-      const cached = localStorage.getItem(BRANCHES_STORAGE_KEY);
+      const cached = localStorage.getItem("BRANCHES_CACHE_V1");
       setBranches(cached ? JSON.parse(cached) : []);
     } catch (err) {
       console.error("Error loading branches:", err);
@@ -214,12 +119,12 @@ const FuelDashboard = () => {
 
   // Save functions
   const saveFuelLogs = (data: FuelLevelLog[]) => {
-    localStorage.setItem(GENERATOR_FUEL_LEVEL_STORAGE_KEY, JSON.stringify(data));
+    FuelDataManager.saveFuelLogs(selectedFuelType, data);
     setFuelLogs(data);
   };
 
   const saveReorderRequests = (data: FuelReorderRequest[]) => {
-    localStorage.setItem(FUEL_REORDER_STORAGE_KEY, JSON.stringify(data));
+    FuelDataManager.saveReorderRequests(selectedFuelType, data);
     setReorderRequests(data);
   };
 

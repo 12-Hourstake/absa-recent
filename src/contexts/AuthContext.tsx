@@ -77,6 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Check for existing session with safe operations
     const savedSession = safeGetFromStorage(AUTH_SESSION_KEY, null);
     if (savedSession) {
+      console.log('Found saved session:', savedSession);
       // Validate session integrity
       if (validateSessionIntegrity(savedSession)) {
         // Ensure permissions are safe
@@ -84,11 +85,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           ...savedSession,
           permissions: getSafePermissions(savedSession.permissions)
         };
+        console.log('Setting session from localStorage:', safeSession);
         setSession(safeSession);
       } else {
+        console.log('Invalid session found, clearing');
         // Invalid session - clear it
         localStorage.removeItem(AUTH_SESSION_KEY);
       }
+    } else {
+      console.log('No saved session found');
     }
     setAuthReady(true);
     setIsLoading(false);
@@ -143,14 +148,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     let foundUser;
     if (credentials.email === "auto@login.com") {
       // Auto-login for admin/vendor cards
-      foundUser = {
-        fullName: credentials.portal === "admin" ? "Facility Manager" : "Vendor Admin",
-        email: credentials.email,
-        role: credentials.portal === "admin" ? "FACILITY_MANAGER" : "VENDOR_ADMIN",
-        portal: credentials.portal,
-        status: "ACTIVE",
-        permissions: null
-      };
+      if (credentials.portal === "admin") {
+        foundUser = {
+          userId: "admin-auto",
+          fullName: "Facility Manager",
+          email: "admin@absa.com.gh",
+          role: "FACILITY_MANAGER",
+          portal: "admin",
+          status: "ACTIVE",
+          permissions: {
+            pages: {
+              dashboard: true,
+              assets: true,
+              maintenance: true,
+              workOrders: true,
+              vendors: true,
+              utilities: true,
+              fuel: true,
+              water: true,
+              reports: true,
+              branches: true,
+              sla: true,
+              documents: true,
+              settings: true
+            },
+            actions: {
+              assets: { create: true, edit: true },
+              workOrders: { create: true, edit: true, close: true },
+              utilities: { addBill: true, uploadReceipt: true },
+              vendors: { create: true, edit: true }
+            }
+          }
+        };
+      } else if (credentials.portal === "vendor") {
+        foundUser = {
+          userId: "vendor-admin",
+          fullName: "Vendor Admin",
+          email: "vendor@absa.com.gh",
+          role: "VENDOR_ADMIN",
+          portal: "vendor",
+          vendorId: "vendor-001",
+          status: "ACTIVE",
+          permissions: {
+            pages: {
+              dashboard: true,
+              workOrders: true,
+              contracts: true,
+              performance: true,
+              invoices: true,
+              documents: true,
+              settings: true
+            },
+            actions: {
+              workOrders: { create: true, edit: true, close: true }
+            }
+          }
+        };
+      }
     } else {
       // Regular login for colleague portal
       foundUser = {

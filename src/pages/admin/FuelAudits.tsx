@@ -15,22 +15,7 @@ import { Search, Eye, CheckCircle, AlertTriangle, Clock, Edit, Trash2 } from "lu
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import { FuelTabs } from "@/components/ui/FuelTabs";
 import { FuelType, getFuelContext, setFuelContext } from "@/utils/fuelContext";
-
-interface FuelAudit {
-  id: string;
-  deliveryId: string;
-  branchSite: string;
-  auditType: "snap-check" | "emergency-review";
-  approvalTrailVerified: boolean;
-  deliveryAccuracyVerified: boolean;
-  documentationComplete: boolean;
-  findings: string;
-  actionRequired: string;
-  status: "open" | "addressed" | "closed";
-  auditDate: string;
-  auditorName: string;
-  createdAt: string;
-}
+import { FuelDataManager, FuelAudit } from "@/utils/fuelDataManager";
 
 const FuelAudits = () => {
   // Fuel context state
@@ -56,61 +41,7 @@ const FuelAudits = () => {
   };
 
   const loadAudits = () => {
-    const cached = localStorage.getItem("FUEL_AUDIT_CACHE_V1");
-    if (cached) {
-      setAudits(JSON.parse(cached));
-    } else {
-      // Initialize with sample data
-      const sampleAudits: FuelAudit[] = [
-        {
-          id: "AUD001",
-          deliveryId: "FD001",
-          branchSite: "Accra Main Branch",
-          auditType: "snap-check",
-          approvalTrailVerified: true,
-          deliveryAccuracyVerified: true,
-          documentationComplete: true,
-          findings: "All procedures followed correctly",
-          actionRequired: "None",
-          status: "closed",
-          auditDate: "2024-01-16",
-          auditorName: "Sarah Johnson",
-          createdAt: "2024-01-16"
-        },
-        {
-          id: "AUD002",
-          deliveryId: "FD002",
-          branchSite: "Kumasi Branch",
-          auditType: "emergency-review",
-          approvalTrailVerified: true,
-          deliveryAccuracyVerified: false,
-          documentationComplete: true,
-          findings: "Short delivery not properly documented",
-          actionRequired: "Update delivery documentation procedures",
-          status: "addressed",
-          auditDate: "2024-01-15",
-          auditorName: "Michael Brown",
-          createdAt: "2024-01-15"
-        },
-        {
-          id: "AUD003",
-          deliveryId: "FD003",
-          branchSite: "Tema Branch",
-          auditType: "snap-check",
-          approvalTrailVerified: false,
-          deliveryAccuracyVerified: true,
-          documentationComplete: false,
-          findings: "Missing approval signatures, incomplete documentation",
-          actionRequired: "Retrain staff on approval procedures",
-          status: "open",
-          auditDate: "2024-01-14",
-          auditorName: "David Wilson",
-          createdAt: "2024-01-14"
-        }
-      ];
-      setAudits(sampleAudits);
-      localStorage.setItem("FUEL_AUDIT_CACHE_V1", JSON.stringify(sampleAudits));
-    }
+    setAudits(FuelDataManager.getAudits(selectedFuelType));
   };
 
   const getStatusBadge = (status: FuelAudit["status"]) => {

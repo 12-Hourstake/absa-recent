@@ -15,20 +15,7 @@ import { Search, Download, CheckCircle, AlertTriangle, Edit, Eye } from "lucide-
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import { FuelTabs } from "@/components/ui/FuelTabs";
 import { FuelType, getFuelContext, setFuelContext } from "@/utils/fuelContext";
-
-interface MonthlyReconciliation {
-  id: string;
-  month: string;
-  branchSite: string;
-  totalApproved: number;
-  totalDelivered: number;
-  omcStatement: number;
-  variance: number;
-  status: "pending" | "balanced" | "discrepancy" | "resolved";
-  verifiedBy: string;
-  dateVerified: string;
-  notes: string;
-}
+import { FuelDataManager, MonthlyReconciliation } from "@/utils/fuelDataManager";
 
 const FuelReconciliation = () => {
   // Fuel context state
@@ -56,42 +43,7 @@ const FuelReconciliation = () => {
   };
 
   const loadReconciliations = () => {
-    const cached = localStorage.getItem("FUEL_RECONCILIATION_CACHE_V1");
-    if (cached) {
-      setReconciliations(JSON.parse(cached));
-    } else {
-      // Initialize with sample data
-      const sampleData: MonthlyReconciliation[] = [
-        {
-          id: "REC-2024-01-ACC",
-          month: "January 2024",
-          branchSite: "Accra Main Branch",
-          totalApproved: 1500,
-          totalDelivered: 1500,
-          omcStatement: 1500,
-          variance: 0,
-          status: "balanced",
-          verifiedBy: "John Doe",
-          dateVerified: "2024-02-05",
-          notes: "All records match"
-        },
-        {
-          id: "REC-2024-01-KUM",
-          month: "January 2024",
-          branchSite: "Kumasi Branch",
-          totalApproved: 800,
-          totalDelivered: 780,
-          omcStatement: 800,
-          variance: 20,
-          status: "discrepancy",
-          verifiedBy: "",
-          dateVerified: "",
-          notes: "Short delivery variance under investigation"
-        }
-      ];
-      setReconciliations(sampleData);
-      localStorage.setItem("FUEL_RECONCILIATION_CACHE_V1", JSON.stringify(sampleData));
-    }
+    setReconciliations(FuelDataManager.getReconciliations(selectedFuelType));
   };
 
   const getStatusBadge = (status: MonthlyReconciliation["status"]) => {
@@ -115,7 +67,7 @@ const FuelReconciliation = () => {
           : rec
       );
       setReconciliations(updated);
-      localStorage.setItem("FUEL_RECONCILIATION_CACHE_V1", JSON.stringify(updated));
+      FuelDataManager.saveReconciliations(selectedFuelType, updated);
       setIsReconcileModalOpen(false);
       setReconcileNotes("");
     }
@@ -129,7 +81,7 @@ const FuelReconciliation = () => {
           : rec
       );
       setReconciliations(updated);
-      localStorage.setItem("FUEL_RECONCILIATION_CACHE_V1", JSON.stringify(updated));
+      FuelDataManager.saveReconciliations(selectedFuelType, updated);
       setIsFlagIssueModalOpen(false);
       setFlagIssueData({ issue: "", resolution: "" });
     }
