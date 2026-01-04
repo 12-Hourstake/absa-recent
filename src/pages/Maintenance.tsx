@@ -639,7 +639,7 @@ const Maintenance = () => {
                                   handleCalendarItemClick(event);
                                 }}
                               >
-                                {event.status === 'overdue' ? '! ' : ''}{event.title.length > 10 ? event.title.substring(0, 10) + '...' : event.title}
+                                {event.status === 'overdue' ? '! ' : ''}{(event.title || '').length > 10 ? (event.title || '').substring(0, 10) + '...' : (event.title || 'Untitled')}
                               </div>
                             ))}
                           </div>
@@ -662,8 +662,8 @@ const Maintenance = () => {
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col h-1/2">
               <h3 className="text-sm font-bold text-slate-800 mb-4">Work Order Backlog by Priority</h3>
               <div className="flex items-end justify-between flex-1 gap-3 px-2">
-                {Object.entries(metrics.priorityBreakdown).map(([priority, count]) => {
-                  const maxCount = Math.max(...Object.values(metrics.priorityBreakdown));
+                {Object.entries(metrics.priorityBreakdown || {}).map(([priority, count]) => {
+                  const maxCount = Math.max(...Object.values(metrics.priorityBreakdown || {}));
                   const height = maxCount > 0 ? Math.max((count / maxCount) * 100, 5) : 5;
                   const colors = {
                     Critical: { bg: 'bg-red-500', text: 'text-red-600' },

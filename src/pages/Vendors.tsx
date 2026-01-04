@@ -380,7 +380,8 @@ const Vendors = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
       {/* Success/Error Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -393,261 +394,262 @@ const Vendors = () => {
         </Alert>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Vendor Performance Review</h1>
-          <p className="text-muted-foreground">KPI-based vendor evaluation system</p>
-        </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Vendor
-        </Button>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Vendors</p>
-                <p className="text-2xl font-bold">{stats.totalVendors}</p>
-              </div>
-              <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
-                <Users className="h-5 w-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Excellent Performers</p>
-                <p className="text-2xl font-bold">{stats.excellentVendors}</p>
-              </div>
-              <div className="rounded-lg bg-green-50 p-2 text-green-600">
-                <Award className="h-5 w-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Average Score</p>
-                <p className="text-2xl font-bold">{stats.averageScore}/15</p>
-              </div>
-              <div className="rounded-lg bg-purple-50 p-2 text-purple-600">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Work Orders</p>
-                <p className="text-2xl font-bold">{stats.totalWorkOrders}</p>
-              </div>
-              <div className="rounded-lg bg-orange-50 p-2 text-orange-600">
-                <Star className="h-5 w-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Vendor Selection for Comparison */}
-      <Card>
-        <CardHeader className="bg-muted/50 p-4">
-          <CardTitle className="text-base flex items-center justify-between">
-            Select Vendors to Compare (2-5)
-            {selectedVendors.length >= 5 && (
-              <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                You can compare up to 5 vendors at a time
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vendorPerformances.map((performance) => (
-              <div
-                key={performance.vendorId}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  selectedVendors.includes(performance.vendorId)
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                } ${selectedVendors.length >= 5 && !selectedVendors.includes(performance.vendorId) ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => handleVendorSelection(performance.vendorId)}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">{performance.vendorName}</h3>
-                  <div className="flex gap-1">
-                    <Badge className={getRatingColor(performance.overallRating)}>
-                      {performance.overallRating}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="space-y-1 text-sm text-muted-foreground mb-2">
-                  <p>Total Score: {performance.totalScore}/15</p>
-                  <p>Work Orders: {vendorStats.find(vs => vs.vendorId === performance.vendorId)?.totalWorkOrders || 0}</p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-1">
-                    {getPortalAccessBadge(vendors.find(v => v.id === performance.vendorId)?.hasPortalAccess || false)}
-                    {getStatusBadge(vendors.find(v => v.id === performance.vendorId)?.status || "active")}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const vendor = vendors.find(v => v.id === performance.vendorId);
-                      if (vendor) handleViewVendor(vendor);
-                    }}
-                    title="View Details"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Vendor Performance Review</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base truncate">KPI-based vendor evaluation system</p>
           </div>
-        </CardContent>
-      </Card>
+          <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 w-full sm:w-auto flex-shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Add Vendor</span>
+          </Button>
+        </div>
 
-      {/* Multi-Vendor Comparison */}
-      {selectedVendors.length >= 2 && (
-        <div className={`grid gap-6 overflow-x-auto ${
-          selectedVendors.length === 2 ? 'grid-cols-1 lg:grid-cols-2' :
-          selectedVendors.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
-          'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
-        }`}>
-          {selectedVendors.map((vendorId) => {
-            const { performance, stats } = getComparisonData(vendorId);
-            if (!performance || !stats) return null;
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+          <Card className="min-w-0">
+            <CardContent className="p-2 sm:p-3 lg:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Vendors</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold">{stats.totalVendors}</p>
+                </div>
+                <div className="rounded-lg bg-blue-50 p-1 sm:p-2 text-blue-600 flex-shrink-0">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            return (
-              <Card key={vendorId} className="border-2 border-blue-200">
-                <CardHeader className="bg-blue-50 p-4">
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    {performance.vendorName}
-                    <Badge className={getRatingColor(performance.overallRating)}>
-                      {performance.overallRating}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-4">
-                  {/* KPI Scores */}
-                  <div>
-                    <h4 className="font-medium mb-2">KPI Performance</h4>
-                    <div className="space-y-2">
-                      {performance.kpis.map((kpi, index) => (
-                        <div key={kpi.id} className="flex justify-between items-center">
-                          <span className="text-sm">KPI {index + 1}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${
-                                  kpi.score === 3 ? 'bg-green-500' : 
-                                  kpi.score === 2 ? 'bg-yellow-500' : 
-                                  kpi.score === 1 ? 'bg-red-500' : 'bg-gray-300'
-                                }`}
-                                style={{ width: `${(kpi.score / 3) * 100}%` }}
-                              />
+          <Card className="min-w-0">
+            <CardContent className="p-2 sm:p-3 lg:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Excellent Performers</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold">{stats.excellentVendors}</p>
+                </div>
+                <div className="rounded-lg bg-green-50 p-1 sm:p-2 text-green-600 flex-shrink-0">
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="min-w-0">
+            <CardContent className="p-2 sm:p-3 lg:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Average Score</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold">{stats.averageScore}/15</p>
+                </div>
+                <div className="rounded-lg bg-purple-50 p-1 sm:p-2 text-purple-600 flex-shrink-0">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="min-w-0">
+            <CardContent className="p-2 sm:p-3 lg:p-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Work Orders</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold">{stats.totalWorkOrders}</p>
+                </div>
+                <div className="rounded-lg bg-orange-50 p-1 sm:p-2 text-orange-600 flex-shrink-0">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Vendor Selection for Comparison */}
+        <Card className="w-full">
+          <CardHeader className="bg-muted/50 p-2 sm:p-3 lg:p-4">
+            <CardTitle className="text-sm lg:text-base flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span className="truncate">Select Vendors to Compare (2-5)</span>
+              {selectedVendors.length >= 5 && (
+                <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded break-words">
+                  You can compare up to 5 vendors at a time
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2 sm:p-3 lg:p-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 w-full">
+              {vendorPerformances.map((performance) => (
+                <div
+                  key={performance.vendorId}
+                  className={`p-2 sm:p-3 lg:p-4 border rounded-lg cursor-pointer transition-all min-w-0 ${
+                    selectedVendors.includes(performance.vendorId)
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  } ${selectedVendors.length >= 5 && !selectedVendors.includes(performance.vendorId) ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => handleVendorSelection(performance.vendorId)}
+                >
+                  <div className="flex items-center justify-between mb-2 gap-2 w-full">
+                    <h3 className="font-semibold text-sm sm:text-base truncate flex-1 min-w-0">{performance.vendorName}</h3>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Badge className={`${getRatingColor(performance.overallRating)} text-xs`}>
+                        {performance.overallRating}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-xs sm:text-sm text-muted-foreground mb-2">
+                    <p className="truncate">Total Score: {performance.totalScore}/15</p>
+                    <p className="truncate">Work Orders: {vendorStats.find(vs => vs.vendorId === performance.vendorId)?.totalWorkOrders || 0}</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-1 min-w-0">
+                      {getPortalAccessBadge(vendors.find(v => v.id === performance.vendorId)?.hasPortalAccess || false)}
+                      {getStatusBadge(vendors.find(v => v.id === performance.vendorId)?.status || "active")}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const vendor = vendors.find(v => v.id === performance.vendorId);
+                        if (vendor) handleViewVendor(vendor);
+                      }}
+                      title="View Details"
+                      className="h-8 w-8 p-0 flex-shrink-0"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Multi-Vendor Comparison */}
+        {selectedVendors.length >= 2 && (
+          <div className={`grid gap-3 sm:gap-4 lg:gap-6 w-full overflow-x-hidden ${
+            selectedVendors.length === 2 ? 'grid-cols-1 lg:grid-cols-2' :
+            selectedVendors.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
+            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+          }`}>
+            {selectedVendors.map((vendorId) => {
+              const { performance, stats } = getComparisonData(vendorId);
+              if (!performance || !stats) return null;
+
+              return (
+                <Card key={vendorId} className="border-2 border-blue-200 min-w-0">
+                  <CardHeader className="bg-blue-50 p-2 sm:p-3 lg:p-4">
+                    <CardTitle className="text-sm sm:text-base lg:text-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <span className="truncate flex-1 min-w-0">{performance.vendorName}</span>
+                      <Badge className={`${getRatingColor(performance.overallRating)} text-xs flex-shrink-0`}>
+                        {performance.overallRating}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2 sm:p-3 lg:p-4 space-y-3 sm:space-y-4 w-full min-w-0">
+                    {/* KPI Scores */}
+                    <div className="w-full">
+                      <h4 className="font-medium mb-2 text-sm">KPI Performance</h4>
+                      <div className="space-y-2">
+                        {performance.kpis.map((kpi, index) => (
+                          <div key={kpi.id} className="flex justify-between items-center gap-2 w-full">
+                            <span className="text-xs sm:text-sm truncate flex-1 min-w-0">KPI {index + 1}</span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <div className="w-12 sm:w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    kpi.score === 3 ? 'bg-green-500' : 
+                                    kpi.score === 2 ? 'bg-yellow-500' : 
+                                    kpi.score === 1 ? 'bg-red-500' : 'bg-gray-300'
+                                  }`}
+                                  style={{ width: `${(kpi.score / 3) * 100}%` }}
+                                />
+                              </div>
+                              <span className={`text-xs font-medium ${getScoreColor(kpi.score)}`}>
+                                {kpi.score}/3
+                              </span>
                             </div>
-                            <span className={`text-sm font-medium ${getScoreColor(kpi.score)}`}>
-                              {kpi.score}/3
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 pt-3 border-t">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-sm">Total Score</span>
+                          <span className="text-base sm:text-lg font-bold">{performance.totalScore}/15</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Work Order Stats */}
+                    <div className="w-full">
+                      <h4 className="font-medium mb-2 text-sm">Work Order Statistics</h4>
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+                        <div className="text-center p-2 sm:p-3 bg-muted rounded-lg min-w-0">
+                          <p className="text-base sm:text-lg lg:text-2xl font-bold">{stats.totalWorkOrders}</p>
+                          <p className="text-xs text-muted-foreground">Total</p>
+                        </div>
+                        <div className="text-center p-2 sm:p-3 bg-green-50 rounded-lg min-w-0">
+                          <p className="text-base sm:text-lg lg:text-2xl font-bold text-green-600">{stats.completedWorkOrders}</p>
+                          <p className="text-xs text-muted-foreground">Completed</p>
+                        </div>
+                        <div className="text-center p-2 sm:p-3 bg-red-50 rounded-lg min-w-0">
+                          <p className="text-base sm:text-lg lg:text-2xl font-bold text-red-600">{stats.rejectedWorkOrders}</p>
+                          <p className="text-xs text-muted-foreground">Rejected</p>
+                        </div>
+                        <div className="text-center p-2 sm:p-3 bg-orange-50 rounded-lg min-w-0">
+                          <p className="text-base sm:text-lg lg:text-2xl font-bold text-orange-600">{stats.openWorkOrders}</p>
+                          <p className="text-xs text-muted-foreground">Open</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SLA Performance */}
+                    <div className="w-full">
+                      <h4 className="font-medium mb-2 text-sm">SLA Performance</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm truncate">SLA Met: {stats.slaMetCount}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm truncate">SLA Breached: {stats.slaBreachedCount}</span>
+                        </div>
+                      </div>
+                      {stats.totalWorkOrders > 0 && (
+                        <div className="mt-2">
+                          <div className="flex justify-between mb-1">
+                            <span className="text-xs sm:text-sm">SLA Compliance Rate</span>
+                            <span className="text-xs sm:text-sm font-medium">
+                              {Math.round((stats.slaMetCount / (stats.slaMetCount + stats.slaBreachedCount)) * 100) || 0}%
                             </span>
                           </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-green-500 h-2 rounded-full"
+                              style={{ 
+                                width: `${Math.round((stats.slaMetCount / (stats.slaMetCount + stats.slaBreachedCount)) * 100) || 0}%` 
+                              }}
+                            />
+                          </div>
                         </div>
-                      ))}
+                      )}
                     </div>
-                    <div className="mt-3 pt-3 border-t">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Score</span>
-                        <span className="text-lg font-bold">{performance.totalScore}/15</span>
-                      </div>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
-                  {/* Work Order Stats */}
-                  <div>
-                    <h4 className="font-medium mb-2">Work Order Statistics</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-muted rounded-lg">
-                        <p className="text-2xl font-bold">{stats.totalWorkOrders}</p>
-                        <p className="text-sm text-muted-foreground">Total</p>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">{stats.completedWorkOrders}</p>
-                        <p className="text-sm text-muted-foreground">Completed</p>
-                      </div>
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <p className="text-2xl font-bold text-red-600">{stats.rejectedWorkOrders}</p>
-                        <p className="text-sm text-muted-foreground">Rejected</p>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <p className="text-2xl font-bold text-orange-600">{stats.openWorkOrders}</p>
-                        <p className="text-sm text-muted-foreground">Open</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SLA Performance */}
-                  <div>
-                    <h4 className="font-medium mb-2">SLA Performance</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">SLA Met: {stats.slaMetCount}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <XCircle className="h-4 w-4 text-red-600" />
-                        <span className="text-sm">SLA Breached: {stats.slaBreachedCount}</span>
-                      </div>
-                    </div>
-                    {stats.totalWorkOrders > 0 && (
-                      <div className="mt-2">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm">SLA Compliance Rate</span>
-                          <span className="text-sm font-medium">
-                            {Math.round((stats.slaMetCount / (stats.slaMetCount + stats.slaBreachedCount)) * 100) || 0}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ 
-                              width: `${Math.round((stats.slaMetCount / (stats.slaMetCount + stats.slaBreachedCount)) * 100) || 0}%` 
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {selectedVendors.length === 1 && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4 text-center">
-            <p className="text-orange-800">Select at least one more vendor to start comparison</p>
-          </CardContent>
-        </Card>
-      )}
+        {selectedVendors.length === 1 && (
+          <Card className="border-orange-200 bg-orange-50 w-full">
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-orange-800 text-sm break-words">Select at least one more vendor to start comparison</p>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Vendor Performance Table */}
       <Card>
@@ -933,6 +935,7 @@ const Vendors = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };

@@ -117,7 +117,6 @@ const collapsibleSections = [
     permission: "documents",
     items: [
       { title: "Documents", url: "/admin/documents", icon: FolderOpen },
-      { title: "Analytics", url: "/admin/analytics", icon: TrendingUp },
     ],
   },
 ];

@@ -309,7 +309,8 @@ const GhanaWater = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="p-4 space-y-6 min-w-0">
       {/* Success/Error Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -323,12 +324,12 @@ const GhanaWater = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Utilities Management – Water (GWCL)</h1>
-          <p className="text-muted-foreground">Track water bills, approvals, payments, and reconciliation</p>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
+        <div className="min-w-0">
+          <h1 className="text-xl lg:text-2xl font-bold tracking-tight break-words">Utilities Management – Water (GWCL)</h1>
+          <p className="text-muted-foreground text-sm break-words">Track water bills, approvals, payments, and reconciliation</p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add Water Bill
         </Button>
@@ -735,6 +736,7 @@ const GhanaWater = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

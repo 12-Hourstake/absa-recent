@@ -145,69 +145,72 @@ const Utilities = () => {
   ];
 
   return (
-    <div className="flex-1 px-4 py-8 md:px-8 lg:px-12 w-full max-w-[1920px] mx-auto">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="flex-1 px-4 py-8 md:px-8 lg:px-12 w-full max-w-[1920px] mx-auto min-w-0">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 min-w-0">
+        <div className="space-y-2 min-w-0">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight break-words">
             Utility Management
           </h2>
-          <p className="text-slate-500 text-base">
+          <p className="text-slate-500 text-sm lg:text-base break-words">
             Monitor utility consumption, costs, and sustainability metrics across Ghana operations.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2 border-r border-slate-200 pr-3 mr-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200 min-w-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-b sm:border-b-0 sm:border-r border-slate-200 pb-3 sm:pb-0 sm:pr-3 sm:mr-1 min-w-0">
             <input
-              className="text-xs border-slate-300 rounded focus:ring-teal-500 focus:border-teal-500 py-1.5 px-2 text-slate-600"
+              className="text-xs border-slate-300 rounded focus:ring-teal-500 focus:border-teal-500 py-1.5 px-2 text-slate-600 w-full sm:w-auto"
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
             />
-            <span className="text-slate-400 text-xs">to</span>
+            <span className="text-slate-400 text-xs text-center sm:text-left">to</span>
             <input
-              className="text-xs border-slate-300 rounded focus:ring-teal-500 focus:border-teal-500 py-1.5 px-2 text-slate-600"
+              className="text-xs border-slate-300 rounded focus:ring-teal-500 focus:border-teal-500 py-1.5 px-2 text-slate-600 w-full sm:w-auto"
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
             />
-            <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-1.5 px-3 rounded transition-colors">
+            <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-1.5 px-3 rounded transition-colors w-full sm:w-auto">
               Apply Filter
             </button>
           </div>
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded shadow-sm transition-colors">
-            <Download className="h-4 w-4" />
-            Export
-          </button>
-          <button 
-            className="flex items-center gap-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded shadow-sm transition-colors"
-            onClick={() => {
-              console.log('Log Reading button clicked');
-              setShowLogModal(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            Log Reading
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 min-w-0">
+            <button className="flex items-center justify-center gap-2 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded shadow-sm transition-colors">
+              <Download className="h-4 w-4" />
+              <span className="truncate">Export</span>
+            </button>
+            <button 
+              className="flex items-center justify-center gap-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded shadow-sm transition-colors"
+              onClick={() => {
+                console.log('Log Reading button clicked');
+                setShowLogModal(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="truncate">Log Reading</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-8 min-w-0">
         {kpiData.map((kpi, index) => (
-          <div key={index} className={`bg-white rounded-xl p-5 shadow-sm border-l-4 ${kpi.borderColor}`}>
-            <div className="flex justify-between items-start mb-2">
-              <p className="text-slate-500 text-sm font-medium">{kpi.title}</p>
-              <kpi.icon className={`h-5 w-5 ${kpi.iconColor}`} />
+          <div key={index} className={`bg-white rounded-xl p-4 lg:p-5 shadow-sm border-l-4 ${kpi.borderColor} min-w-0`}>
+            <div className="flex justify-between items-start mb-2 min-w-0">
+              <p className="text-slate-500 text-sm font-medium truncate pr-2">{kpi.title}</p>
+              <kpi.icon className={`h-5 w-5 ${kpi.iconColor} flex-shrink-0`} />
             </div>
-            <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-bold text-slate-900">
+            <div className="flex items-baseline gap-2 min-w-0">
+              <h3 className="text-xl lg:text-2xl font-bold text-slate-900 truncate">
                 {kpi.value} {kpi.unit && <span className="text-sm font-normal text-slate-500">{kpi.unit}</span>}
               </h3>
             </div>
-            <div className={`mt-2 flex items-center text-xs font-medium w-fit px-2 py-1 rounded ${kpi.trendColor}`}>
-              {kpi.trendIcon && <span className="material-symbols-outlined text-sm mr-1">{kpi.trendIcon}</span>}
-              {kpi.trend}
+            <div className={`mt-2 flex items-center text-xs font-medium w-fit px-2 py-1 rounded ${kpi.trendColor} max-w-full`}>
+              {kpi.trendIcon && <span className="material-symbols-outlined text-sm mr-1 flex-shrink-0">{kpi.trendIcon}</span>}
+              <span className="truncate">{kpi.trend}</span>
             </div>
           </div>
         ))}
@@ -588,6 +591,7 @@ const Utilities = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

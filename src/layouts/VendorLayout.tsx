@@ -51,7 +51,7 @@ const VendorLayout = () => {
     { title: "Dashboard", url: "/vendor/dashboard", icon: LayoutDashboard },
     { title: "Work Orders", url: "/vendor/work-orders", icon: ClipboardList },
     { title: "Invoice Submission", url: "/vendor/invoice-submission", icon: Receipt },
-    { title: "SLA Penalties", url: "/vendor/sla-penalties", icon: AlertTriangle },
+    { title: "Penalties", url: "/vendor/penalties", icon: AlertTriangle },
     { title: "Profile", url: "/vendor/profile", icon: User },
     { title: "Support", url: "/vendor/support", icon: HelpCircle },
   ];

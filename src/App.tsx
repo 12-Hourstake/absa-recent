@@ -105,7 +105,6 @@ const Requests = lazy(() => import("./pages/admin/Requests"));
 const AdminLogs = lazy(() => import("./pages/admin/Logs"));
 const Logs = lazy(() => import("./pages/admin/Logs"));
 const Documents = lazy(() => import("./pages/admin/Documents"));
-const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const SLAPenaltyCalculator = lazy(() => import("./pages/admin/SLAPenaltyCalculator"));
 const SLADashboard = lazy(() => import("./pages/admin/SLADashboard"));
 const SLABreaches = lazy(() => import("./pages/admin/SLABreaches"));
@@ -141,6 +140,9 @@ const DocumentUploads = lazy(() => import("./pages/vendor/DocumentUploads"));
 const ServiceCatalog = lazy(() => import("./pages/vendor/ServiceCatalog"));
 const VendorProfileSettings = lazy(() => import("./pages/vendor/VendorProfileSettings"));
 const VendorSupport = lazy(() => import("./pages/vendor/VendorSupport"));
+
+// Import SLAPenalties directly to test
+import SLAPenalties from "./pages/vendor/SLAPenalties";
 
 // Types
 import { UserRole } from "@/types/auth";
@@ -203,7 +205,6 @@ const AppRouter = () => {
             <Route path="requests" element={<Requests />} />
             <Route path="logs" element={<AdminLogs />} />
             <Route path="documents" element={<Documents />} />
-            <Route path="analytics" element={<Analytics />} />
             <Route path="sla-dashboard" element={<SLADashboard />} />
             <Route path="sla-breaches" element={<SLABreaches />} />
             <Route path="sla-penalty-calculator" element={<SLAPenaltyCalculator />} />
@@ -268,6 +269,7 @@ const AppRouter = () => {
             <Route path="availability" element={<AvailabilityCalendar />} />
             <Route path="documents" element={<DocumentUploads />} />
             <Route path="service-catalog" element={<ServiceCatalog />} />
+            <Route path="penalties" element={<SLAPenalties />} />
             <Route path="settings" element={<VendorProfileSettings />} />
             <Route path="support" element={<VendorSupport />} />
           </Route>

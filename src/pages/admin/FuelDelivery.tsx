@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Eye, AlertTriangle, Flag, X, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Eye, AlertTriangle, Flag, X, Edit, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import ResponsiveTable from "@/components/ui/ResponsiveTable";
 import CustomSelectDropdown from "@/components/ui/CustomSelectDropdown";
 import { mockBranches } from "@/data";
@@ -29,11 +29,28 @@ const FuelDelivery = () => {
   const [selectedDelivery, setSelectedDelivery] = useState<FuelDeliveryType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<Partial<FuelDeliveryType>>({});
+  const [fuelCardSearch, setFuelCardSearch] = useState("");
+  const [showFuelCardDropdown, setShowFuelCardDropdown] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
     loadDeliveries();
   }, [selectedFuelType]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.fuel-card-dropdown-container')) {
+        setShowFuelCardDropdown(false);
+      }
+    };
+
+    if (showFuelCardDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFuelCardDropdown]);
 
   // Handle fuel type change
   const handleFuelTypeChange = (fuelType: FuelType) => {
@@ -43,6 +60,22 @@ const FuelDelivery = () => {
 
   const loadDeliveries = () => {
     setDeliveries(FuelDataManager.getDeliveries(selectedFuelType));
+  };
+
+  // Get fuel cards for the current fuel type
+  const getFuelCards = () => {
+    return FuelDataManager.getFuelCards(selectedFuelType);
+  };
+
+  // Filter fuel cards based on search term
+  const getFilteredFuelCards = () => {
+    const fuelCards = getFuelCards();
+    if (!fuelCardSearch) return fuelCards;
+    return fuelCards.filter(card => 
+      card.cardNumber.toLowerCase().includes(fuelCardSearch.toLowerCase()) ||
+      card.generatorName.toLowerCase().includes(fuelCardSearch.toLowerCase()) ||
+      card.assignedBranch.toLowerCase().includes(fuelCardSearch.toLowerCase())
+    );
   };
 
   const getDiscrepancyBadge = (status: FuelDeliveryType["discrepancyStatus"]) => {
@@ -75,6 +108,7 @@ const FuelDelivery = () => {
   const handleEdit = (delivery: FuelDeliveryType) => {
     setSelectedDelivery(delivery);
     setFormData(delivery);
+    setFuelCardSearch(delivery.fuelCardUsed || "");
     setShowEditModal(true);
   };
 
@@ -85,6 +119,7 @@ const FuelDelivery = () => {
 
   const handleAddDelivery = () => {
     setFormData({});
+    setFuelCardSearch("");
     setShowAddModal(true);
   };
 
@@ -156,42 +191,43 @@ const FuelDelivery = () => {
   };
 
   return (
-    <div className="flex-1 px-4 py-8 md:px-8 lg:px-12 w-full max-w-[1920px] mx-auto space-y-6">
-      <div className="flex flex-wrap justify-between items-start gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Fuel Delivery</h1>
-          <p className="text-muted-foreground mt-1">
-            Track approved {selectedFuelType.toLowerCase()} fuel purchases, transport, and discharge
-          </p>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="flex-1 px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 w-full max-w-[1920px] mx-auto space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Fuel Delivery</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base break-words mt-1">
+              Track approved {selectedFuelType.toLowerCase()} fuel purchases, transport, and discharge
+            </p>
+          </div>
+          <Button className="gap-2 bg-red-600 hover:bg-red-700 w-full sm:w-auto flex-shrink-0" onClick={handleAddDelivery}>
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Log Delivery</span>
+          </Button>
         </div>
-        <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={handleAddDelivery}>
-          <Plus className="h-4 w-4" />
-          Log Delivery
-        </Button>
-      </div>
 
       {/* Fuel Type Tabs */}
       <FuelTabs selectedType={selectedFuelType} onTypeChange={handleFuelTypeChange} />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total Deliveries</p>
-          <p className="text-2xl font-bold mt-2">{stats.total}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Matched</p>
-          <p className="text-2xl font-bold mt-2 text-green-600">{stats.matched}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Discrepancies</p>
-          <p className="text-2xl font-bold mt-2 text-orange-600">{stats.discrepancies}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Escalations</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.escalations}</p>
-        </Card>
-      </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-6">
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Total Deliveries</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2">{stats.total}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Matched</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-green-600">{stats.matched}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Discrepancies</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-orange-600">{stats.discrepancies}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Escalations</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-red-600">{stats.escalations}</p>
+          </Card>
+        </div>
 
       {/* Filters */}
       <Card className="p-4">
@@ -232,7 +268,7 @@ const FuelDelivery = () => {
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Delivery ID</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Branch/Site</th>
-                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Generator</th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">{selectedFuelType === "GENERATOR" ? "Generator" : "Vehicle"}</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">OMC</th>
                 <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">Approved (L)</th>
                 <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">Delivered (L)</th>
@@ -333,7 +369,7 @@ const FuelDelivery = () => {
                   <p className="font-medium">{selectedDelivery.branchSite}</p>
                 </div>
                 <div>
-                  <Label className="text-sm text-muted-foreground">Generator</Label>
+                  <Label className="text-sm text-muted-foreground">{selectedFuelType === "GENERATOR" ? "Generator" : "Vehicle"}</Label>
                   <p className="font-medium">{selectedDelivery.generator}</p>
                 </div>
                 <div>
@@ -401,20 +437,57 @@ const FuelDelivery = () => {
                   />
                 </div>
                 <div>
-                  <Label>Generator *</Label>
+                  <Label>{selectedFuelType === "GENERATOR" ? "Generator" : "Vehicle"} *</Label>
                   <Input
                     value={formData.generator || ""}
                     onChange={(e) => setFormData({ ...formData, generator: e.target.value })}
-                    placeholder="e.g., Generator A1"
+                    placeholder={selectedFuelType === "GENERATOR" ? "e.g., Generator A1" : "e.g., Company Car 1"}
                   />
                 </div>
-                <div>
+                <div className="relative fuel-card-dropdown-container">
                   <Label>Fuel Card Used *</Label>
-                  <Input
-                    value={formData.fuelCardUsed || ""}
-                    onChange={(e) => setFormData({ ...formData, fuelCardUsed: e.target.value })}
-                    placeholder="e.g., 5432-****-****-3210"
-                  />
+                  <div className="relative">
+                    <Input
+                      value={fuelCardSearch}
+                      onChange={(e) => {
+                        setFuelCardSearch(e.target.value);
+                        setShowFuelCardDropdown(true);
+                      }}
+                      onFocus={() => setShowFuelCardDropdown(true)}
+                      placeholder="Search fuel cards..."
+                      className="pr-8"
+                    />
+                    <ChevronDown 
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 cursor-pointer"
+                      onClick={() => setShowFuelCardDropdown(!showFuelCardDropdown)}
+                    />
+                    {showFuelCardDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {getFilteredFuelCards().length === 0 ? (
+                          <div className="px-3 py-2 text-sm text-gray-500">
+                            No fuel cards found
+                          </div>
+                        ) : (
+                          getFilteredFuelCards().map((card) => (
+                            <div
+                              key={card.id}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              onClick={() => {
+                                setFormData({ ...formData, fuelCardUsed: card.cardNumber });
+                                setFuelCardSearch(card.cardNumber);
+                                setShowFuelCardDropdown(false);
+                              }}
+                            >
+                              <div className="font-mono text-sm font-medium">{card.cardNumber}</div>
+                              <div className="text-xs text-gray-500">
+                                {card.generatorName} • {card.assignedBranch} • {card.status}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label>OMC *</Label>
@@ -525,6 +598,7 @@ const FuelDelivery = () => {
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 };

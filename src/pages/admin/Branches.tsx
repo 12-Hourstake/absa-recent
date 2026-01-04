@@ -213,7 +213,8 @@ const Branches = () => {
   const totalFloorArea = branches.reduce((sum, b) => sum + b.floorArea, 0);
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
       {success && (
         <Alert className="border-green-200 bg-green-50">
           <AlertDescription className="text-green-800">✅ {success}</AlertDescription>
@@ -225,51 +226,51 @@ const Branches = () => {
         </Alert>
       )}
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Branch Management</h1>
-          <p className="text-muted-foreground">Manage company branches and locations</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Branch Management</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base truncate">Manage company branches and locations</p>
+          </div>
+          <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 w-full sm:w-auto flex-shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Add Branch</span>
+          </Button>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Branch
-        </Button>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Branches</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{branches.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Branches</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeBranches}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Employees</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalEmployees}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Floor Area</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalFloorArea.toLocaleString()} m²</div>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Total Branches</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{branches.length}</div>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Active Branches</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">{activeBranches}</div>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Total Employees</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{totalEmployees}</div>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Total Floor Area</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{totalFloorArea.toLocaleString()} m²</div>
+            </CardContent>
+          </Card>
+        </div>
 
       <Card>
         <CardContent className="p-4">
@@ -722,6 +723,7 @@ const Branches = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
