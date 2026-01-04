@@ -416,7 +416,8 @@ const Assets = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
       {/* Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -429,449 +430,519 @@ const Assets = () => {
         </Alert>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Assets</h1>
-          <p className="text-muted-foreground">Manage facility assets across branches</p>
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Assets</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base truncate">Manage facility assets across branches</p>
+          </div>
+          <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 w-full sm:w-auto flex-shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Add Asset</span>
+          </Button>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Asset
-        </Button>
-      </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{assets.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {assets.filter(a => a.status === AssetStatus.ACTIVE).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Under Maintenance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {assets.filter(a => a.status === AssetStatus.UNDER_MAINTENANCE).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Inactive</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
-              {assets.filter(a => a.status === AssetStatus.INACTIVE).length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search assets by name, location, serial number..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
-        <CardHeader className="bg-muted/50 p-4">
-          <CardTitle className="text-base">Assets ({filteredAssets.length})</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Asset Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>Serial Number</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Maintenance</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedAssets.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? "No assets found matching your search." : "No assets available."}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedAssets.map((asset) => (
-                    <TableRow key={asset.id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">{asset.name}</TableCell>
-                      <TableCell><Badge variant="outline">{formatEnumValue(asset.type)}</Badge></TableCell>
-                      <TableCell>{asset.location.branch}</TableCell>
-                      <TableCell className="font-mono text-sm">{asset.technicalDetails.serialNumber || "N/A"}</TableCell>
-                      <TableCell>{getStatusBadge(asset.status)}</TableCell>
-                      <TableCell>{formatDate(asset.lastMaintenanceDate)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openViewModal(asset)} title="View">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openEditModal(asset)} title="Edit">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openDeleteModal(asset)} title="Delete" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-4 border-t">
-              <div className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAssets.length)} of {filteredAssets.length} assets
+        {/* Statistics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Total Assets</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold">{assets.length}</div>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Active</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
+                {assets.filter(a => a.status === AssetStatus.ACTIVE).length}
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                <div className="text-sm">
-                  Page {currentPage} of {totalPages}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Under Maintenance</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">
+                {assets.filter(a => a.status === AssetStatus.UNDER_MAINTENANCE).length}
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardHeader className="pb-1 sm:pb-2 px-2 sm:px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground truncate">Inactive</CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-600">
+                {assets.filter(a => a.status === AssetStatus.INACTIVE).length}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Add Modal */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Add New Asset
-            </DialogTitle>
-            <DialogDescription>Add a new asset to the system</DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            {/* Core Asset Fields - Always Visible */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Asset Name *</Label>
+        {/* Search */}
+        <Card className="w-full">
+          <CardContent className="p-2 sm:p-3 lg:p-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Enter asset name"
+                placeholder="Search assets..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10 text-sm w-full min-w-0"
               />
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="type">Type *</Label>
-                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as AssetType }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(AssetType).map(type => (
-                      <SelectItem key={type} value={type}>{formatEnumValue(type)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status *</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.values(AssetStatus).map(status => (
-                      <SelectItem key={status} value={status}>{formatEnumValue(status)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="branch">Branch *</Label>
-              <Select value={formData.location.branch} onValueChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, branch: value } }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select branch" />
-                </SelectTrigger>
-                <SelectContent>
-                  {branches.map(branch => (
-                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="serialNumber">Serial Number</Label>
-                <Input
-                  id="serialNumber"
-                  value={formData.technicalDetails.serialNumber}
-                  onChange={(e) => setFormData(prev => ({ ...prev, technicalDetails: { ...prev.technicalDetails, serialNumber: e.target.value } }))}
-                  placeholder="Enter serial number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastMaintenanceDate">Last Maintenance Date</Label>
-                <Input
-                  id="lastMaintenanceDate"
-                  type="date"
-                  value={formData.lastMaintenanceDate ? new Date(formData.lastMaintenanceDate).toISOString().split('T')[0] : ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, lastMaintenanceDate: e.target.value ? new Date(e.target.value) : undefined }))}
-                />
+        {/* Assets List */}
+        <Card className="w-full">
+          <CardHeader className="bg-muted/50 p-2 sm:p-3 lg:p-4">
+            <CardTitle className="text-sm lg:text-base truncate">Assets ({filteredAssets.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 w-full">
+            {/* Desktop/Tablet Table View */}
+            <div className="hidden lg:block w-full">
+              <div className="w-full overflow-x-auto">
+                <Table className="w-full table-fixed">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[20%] min-w-[120px]">Asset Name</TableHead>
+                      <TableHead className="w-[12%] min-w-[80px]">Type</TableHead>
+                      <TableHead className="w-[15%] min-w-[100px]">Branch</TableHead>
+                      <TableHead className="w-[15%] min-w-[100px]">Serial Number</TableHead>
+                      <TableHead className="w-[12%] min-w-[80px]">Status</TableHead>
+                      <TableHead className="w-[13%] min-w-[100px]">Last Maintenance</TableHead>
+                      <TableHead className="w-[13%] min-w-[100px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedAssets.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          {searchTerm ? "No assets found matching your search." : "No assets available."}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedAssets.map((asset) => (
+                        <TableRow key={asset.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium truncate" title={asset.name}>{asset.name}</TableCell>
+                          <TableCell><Badge variant="outline" className="text-xs truncate">{formatEnumValue(asset.type)}</Badge></TableCell>
+                          <TableCell className="truncate" title={asset.location.branch}>{asset.location.branch}</TableCell>
+                          <TableCell className="font-mono text-sm truncate" title={asset.technicalDetails.serialNumber || "N/A"}>{asset.technicalDetails.serialNumber || "N/A"}</TableCell>
+                          <TableCell>{getStatusBadge(asset.status)}</TableCell>
+                          <TableCell className="text-sm truncate">{formatDate(asset.lastMaintenanceDate)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => openViewModal(asset)} title="View" className="h-8 w-8">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => openEditModal(asset)} title="Edit" className="h-8 w-8">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => openDeleteModal(asset)} title="Delete" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             </div>
 
-            {/* Category Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Asset Category</Label>
-              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select asset category (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AIR_CONDITIONER">Air Conditioner (AC)</SelectItem>
-                  <SelectItem value="GENERATOR">Generator</SelectItem>
-                  <SelectItem value="UPS">UPS</SelectItem>
-                  <SelectItem value="AVR">AVR</SelectItem>
-                  <SelectItem value="PHASE_ROTATION_CORRECTOR">Phase Rotation Corrector</SelectItem>
-                  <SelectItem value="AIR_PURIFIER">Air Purifier</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Category-Specific Fields */}
-            {selectedCategory && (
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Category-Specific Information</h4>
-                <div className="grid gap-4">
-                  {CATEGORY_FIELDS[selectedCategory].map((fieldName) => (
-                    <div key={fieldName} className={fieldName === 'comments' ? 'col-span-full' : ''}>
-                      {renderDynamicField(fieldName)}
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden w-full">
+              {paginatedAssets.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground px-3">
+                  <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="text-base font-medium">No Assets Found</h3>
+                  <p className="text-sm break-words">
+                    {searchTerm ? "No assets found matching your search." : "No assets available."}
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y w-full">
+                  {paginatedAssets.map((asset) => (
+                    <div key={asset.id} className="p-3 space-y-3 w-full min-w-0">
+                      <div className="flex items-start justify-between gap-2 w-full">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm sm:text-base break-words">{asset.name}</h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">{asset.location.branch}</p>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button variant="ghost" size="sm" onClick={() => openViewModal(asset)} className="h-8 w-8 p-0">
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openEditModal(asset)} className="h-8 w-8 p-0">
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openDeleteModal(asset)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50">
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm w-full">
+                        <div className="min-w-0">
+                          <span className="text-muted-foreground block">Type:</span>
+                          <div className="mt-1">
+                            <Badge variant="outline" className="text-xs truncate max-w-full">{formatEnumValue(asset.type)}</Badge>
+                          </div>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-muted-foreground block">Status:</span>
+                          <div className="mt-1">
+                            {getStatusBadge(asset.status)}
+                          </div>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-muted-foreground block">Serial:</span>
+                          <p className="font-mono text-xs mt-1 break-all">{asset.technicalDetails.serialNumber || "N/A"}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-muted-foreground block">Last Maintenance:</span>
+                          <p className="text-xs mt-1 break-words">{formatDate(asset.lastMaintenanceDate)}</p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between px-2 sm:px-3 lg:px-4 py-3 border-t gap-2 w-full">
+                <div className="text-xs text-muted-foreground text-center sm:text-left break-words">
+                  Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredAssets.length)} of {filteredAssets.length} assets
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="h-8 px-2 text-xs"
+                  >
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline ml-1 text-xs">Previous</span>
+                  </Button>
+                  <div className="text-xs px-1 sm:px-2 whitespace-nowrap">
+                    {currentPage} / {totalPages}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="h-8 px-2 text-xs"
+                  >
+                    <span className="hidden sm:inline mr-1 text-xs">Next</span>
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                </div>
               </div>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsAddModalOpen(false); resetForm(); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleAdd} disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Asset"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Add Modal */}
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="truncate">Add New Asset</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">Add a new asset to the system</DialogDescription>
+            </DialogHeader>
 
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Asset</DialogTitle>
-            <DialogDescription>Update asset information</DialogDescription>
-          </DialogHeader>
+            <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
+              {/* Core Asset Fields - Always Visible */}
+              <div className="space-y-2 w-full">
+                <Label htmlFor="name" className="text-xs sm:text-sm font-medium">Asset Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter asset name"
+                  className="text-xs sm:text-sm w-full"
+                />
+              </div>
 
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Asset Name *</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="type" className="text-xs sm:text-sm font-medium">Type *</Label>
+                  <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as AssetType }))}>
+                    <SelectTrigger className="text-xs sm:text-sm w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(AssetType).map(type => (
+                        <SelectItem key={type} value={type} className="text-xs sm:text-sm">{formatEnumValue(type)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as AssetType }))}>
-                  <SelectTrigger>
-                    <SelectValue />
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="status" className="text-xs sm:text-sm font-medium">Status *</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
+                    <SelectTrigger className="text-xs sm:text-sm w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(AssetStatus).map(status => (
+                        <SelectItem key={status} value={status} className="text-xs sm:text-sm">{formatEnumValue(status)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 w-full">
+                <Label htmlFor="branch" className="text-xs sm:text-sm font-medium">Branch *</Label>
+                <Select value={formData.location.branch} onValueChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, branch: value } }))}>
+                  <SelectTrigger className="text-xs sm:text-sm w-full">
+                    <SelectValue placeholder="Select branch" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(AssetType).map(type => (
-                      <SelectItem key={type} value={type}>{formatEnumValue(type)}</SelectItem>
+                    {branches.map(branch => (
+                      <SelectItem key={branch} value={branch} className="text-xs sm:text-sm">{branch}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
-                  <SelectTrigger>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="serialNumber" className="text-xs sm:text-sm font-medium">Serial Number</Label>
+                  <Input
+                    id="serialNumber"
+                    value={formData.technicalDetails.serialNumber}
+                    onChange={(e) => setFormData(prev => ({ ...prev, technicalDetails: { ...prev.technicalDetails, serialNumber: e.target.value } }))}
+                    placeholder="Enter serial number"
+                    className="text-xs sm:text-sm w-full"
+                  />
+                </div>
+
+                <div className="space-y-2 min-w-0">
+                  <Label htmlFor="lastMaintenanceDate" className="text-xs sm:text-sm font-medium">Last Maintenance Date</Label>
+                  <Input
+                    id="lastMaintenanceDate"
+                    type="date"
+                    value={formData.lastMaintenanceDate ? new Date(formData.lastMaintenanceDate).toISOString().split('T')[0] : ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lastMaintenanceDate: e.target.value ? new Date(e.target.value) : undefined }))}
+                    className="text-xs sm:text-sm w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Category Selection */}
+              <div className="space-y-2 w-full">
+                <Label htmlFor="category" className="text-xs sm:text-sm font-medium">Asset Category</Label>
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="text-xs sm:text-sm w-full">
+                    <SelectValue placeholder="Select asset category (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AIR_CONDITIONER" className="text-xs sm:text-sm">Air Conditioner (AC)</SelectItem>
+                    <SelectItem value="GENERATOR" className="text-xs sm:text-sm">Generator</SelectItem>
+                    <SelectItem value="UPS" className="text-xs sm:text-sm">UPS</SelectItem>
+                    <SelectItem value="AVR" className="text-xs sm:text-sm">AVR</SelectItem>
+                    <SelectItem value="PHASE_ROTATION_CORRECTOR" className="text-xs sm:text-sm">Phase Rotation Corrector</SelectItem>
+                    <SelectItem value="AIR_PURIFIER" className="text-xs sm:text-sm">Air Purifier</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Category-Specific Fields */}
+              {selectedCategory && (
+                <div className="border-t pt-3 sm:pt-4 w-full">
+                  <h4 className="font-medium mb-2 sm:mb-3 text-xs sm:text-sm">Category-Specific Information</h4>
+                  <div className="grid gap-3 sm:gap-4 w-full">
+                    {CATEGORY_FIELDS[selectedCategory].map((fieldName) => (
+                      <div key={fieldName} className={`${fieldName === 'comments' ? 'col-span-full' : ''} w-full min-w-0`}>
+                        {renderDynamicField(fieldName)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => { setIsAddModalOpen(false); resetForm(); }} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button onClick={handleAdd} disabled={isLoading} className="w-full sm:w-auto order-1 sm:order-2">
+                {isLoading ? "Adding..." : "Add Asset"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-base sm:text-lg lg:text-xl truncate">Edit Asset</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm">Update asset information</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
+              <div className="space-y-2 w-full">
+                <Label htmlFor="edit-name" className="text-xs sm:text-sm font-medium">Asset Name *</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className="text-xs sm:text-sm w-full"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                <div className="space-y-2 min-w-0">
+                  <Label className="text-xs sm:text-sm font-medium">Type</Label>
+                  <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as AssetType }))}>
+                    <SelectTrigger className="text-xs sm:text-sm w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(AssetType).map(type => (
+                        <SelectItem key={type} value={type} className="text-xs sm:text-sm">{formatEnumValue(type)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2 min-w-0">
+                  <Label className="text-xs sm:text-sm font-medium">Status</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as AssetStatus }))}>
+                    <SelectTrigger className="text-xs sm:text-sm w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(AssetStatus).map(status => (
+                        <SelectItem key={status} value={status} className="text-xs sm:text-sm">{formatEnumValue(status)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2 w-full">
+                <Label className="text-xs sm:text-sm font-medium">Branch</Label>
+                <Select value={formData.location.branch} onValueChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, branch: value } }))}>
+                  <SelectTrigger className="text-xs sm:text-sm w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(AssetStatus).map(status => (
-                      <SelectItem key={status} value={status}>{formatEnumValue(status)}</SelectItem>
+                    {branches.map(branch => (
+                      <SelectItem key={branch} value={branch} className="text-xs sm:text-sm">{branch}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Branch</Label>
-              <Select value={formData.location.branch} onValueChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, branch: value } }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {branches.map(branch => (
-                    <SelectItem key={branch} value={branch}>{branch}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsEditModalOpen(false); setSelectedAsset(null); resetForm(); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleEdit} disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update Asset"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => { setIsEditModalOpen(false); setSelectedAsset(null); resetForm(); }} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button onClick={handleEdit} disabled={isLoading} className="w-full sm:w-auto order-1 sm:order-2">
+                {isLoading ? "Updating..." : "Update Asset"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* View Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Asset Details</DialogTitle>
-          </DialogHeader>
-          {selectedAsset && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Asset Name</Label>
-                  <p className="font-medium">{selectedAsset.name}</p>
+        {/* View Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-base sm:text-lg lg:text-xl truncate">Asset Details</DialogTitle>
+            </DialogHeader>
+            {selectedAsset && (
+              <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Asset Name</Label>
+                    <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{selectedAsset.name}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Type</Label>
+                    <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{formatEnumValue(selectedAsset.type)}</p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Type</Label>
-                  <p className="font-medium">{formatEnumValue(selectedAsset.type)}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Category</Label>
+                    <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{formatEnumValue(selectedAsset.category)}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Status</Label>
+                    <div className="mt-1">{getStatusBadge(selectedAsset.status)}</div>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Category</Label>
-                  <p className="font-medium">{formatEnumValue(selectedAsset.category)}</p>
+                <div className="w-full">
+                  <Label className="text-xs sm:text-sm text-muted-foreground">Branch</Label>
+                  <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{selectedAsset.location.branch}</p>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Status</Label>
-                  <div className="mt-1">{getStatusBadge(selectedAsset.status)}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Serial Number</Label>
+                    <p className="font-medium font-mono text-xs sm:text-sm break-all">{selectedAsset.technicalDetails.serialNumber || "N/A"}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Model</Label>
+                    <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{selectedAsset.technicalDetails.model || "N/A"}</p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Branch</Label>
-                <p className="font-medium">{selectedAsset.location.branch}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Serial Number</Label>
-                  <p className="font-medium font-mono">{selectedAsset.technicalDetails.serialNumber || "N/A"}</p>
+                <div className="w-full">
+                  <Label className="text-xs sm:text-sm text-muted-foreground">Description</Label>
+                  <p className="font-medium text-xs sm:text-sm lg:text-base break-words">{selectedAsset.description || "N/A"}</p>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Model</Label>
-                  <p className="font-medium">{selectedAsset.technicalDetails.model || "N/A"}</p>
-                </div>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Description</Label>
-                <p className="font-medium">{selectedAsset.description || "N/A"}</p>
-              </div>
             </div>
-          )}
-          <DialogFooter>
-            <Button onClick={() => { setIsViewModalOpen(false); setSelectedAsset(null); }}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              )}
+            <DialogFooter className="w-full">
+              <Button onClick={() => { setIsViewModalOpen(false); setSelectedAsset(null); }} className="w-full sm:w-auto">
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Modal */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Asset</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedAsset?.name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setSelectedAsset(null); }}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
-              {isLoading ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Delete Modal */}
+        <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[400px] mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-base sm:text-lg lg:text-xl truncate">Delete Asset</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm break-words">
+                Are you sure you want to delete "{selectedAsset?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => { setIsDeleteModalOpen(false); setSelectedAsset(null); }} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={isLoading} className="w-full sm:w-auto order-1 sm:order-2">
+                {isLoading ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

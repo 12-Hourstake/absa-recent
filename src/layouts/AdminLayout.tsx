@@ -61,12 +61,12 @@ const AdminLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="h-screen flex w-full bg-gradient-to-br from-gray-50 via-white to-red-50/10 overflow-hidden">
+      <div className="h-screen flex w-full max-w-full bg-gradient-to-br from-gray-50 via-white to-red-50/10 overflow-hidden">
         <Sidebar />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-50 h-14 md:h-16 border-b border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-sm flex items-center px-3 sm:px-4 md:px-6 gap-2 sm:gap-4 relative">
+        <header className="sticky top-0 z-50 h-14 md:h-16 border-b border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-sm flex items-center px-3 sm:px-4 md:px-6 gap-2 sm:gap-4 relative min-w-0">
           {/* Left section */}
           <div className="flex items-center">
             <SidebarTrigger className="md:hidden" />
@@ -149,7 +149,7 @@ const AdminLayout = () => {
                     <span className="font-medium">Settings</span>
                   </NavLink>
                 </DropdownMenuItem>
-                {session?.portal === "admin" && (
+                {session?.portal === "admin" && session?.role !== "MAIN_ADMIN" && (
                   <>
                     <DropdownMenuSeparator className="bg-slate-200/60" />
                     <DropdownMenuLabel className="px-4 py-2 text-xs font-medium text-slate-500">
@@ -186,8 +186,10 @@ const AdminLayout = () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 absa-scrollbar">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 absa-scrollbar w-full max-w-full min-w-0">
+          <div className="w-full max-w-full overflow-x-hidden min-w-0">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

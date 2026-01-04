@@ -309,7 +309,8 @@ const ECGElectricity = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="p-4 space-y-6 min-w-0">
       {/* Success/Error Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -323,27 +324,27 @@ const ECGElectricity = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Utilities Management – Electricity (ECG)</h1>
-          <p className="text-muted-foreground">Track ECG bills, approvals, payments, and reconciliation</p>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
+        <div className="min-w-0">
+          <h1 className="text-xl lg:text-2xl font-bold tracking-tight break-words">Utilities Management – Electricity (ECG)</h1>
+          <p className="text-muted-foreground text-sm break-words">Track ECG bills, approvals, payments, and reconciliation</p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add ECG Bill
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 min-w-0">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total ECG Bills</p>
+            <div className="flex items-center justify-between min-w-0">
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground truncate">Total ECG Bills</p>
                 <p className="text-2xl font-bold">{summaryStats.totalBills}</p>
               </div>
-              <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+              <div className="rounded-lg bg-blue-50 p-2 text-blue-600 flex-shrink-0">
                 <FileText className="h-5 w-5" />
               </div>
             </div>
@@ -735,6 +736,7 @@ const ECGElectricity = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

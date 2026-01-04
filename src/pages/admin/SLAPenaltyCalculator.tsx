@@ -83,6 +83,25 @@ const SLAPenaltyCalculator = () => {
         status: 'Pending Payment'
       });
 
+      // Also create work order entry in cache for vendor portal sync
+      const workOrdersCache = JSON.parse(localStorage.getItem("WORK_ORDERS_CACHE_V1") || "[]");
+      const newWorkOrder = {
+        id: `WO-${Date.now()}`,
+        requestType: slaType,
+        asset: `SLA Breach - ${slaType}`,
+        location: "System Generated",
+        priority: severityLevel === 'critical' ? 'Critical' : severityLevel === 'major' ? 'High' : 'Medium',
+        status: "Completed",
+        assignedDate: breachStartDate || new Date().toISOString().split('T')[0],
+        dueDate: new Date().toISOString().split('T')[0],
+        description: `SLA breach penalty calculation for ${slaType}`,
+        assignedVendor: vendor,
+        createdDate: new Date().toISOString()
+      };
+      
+      const updatedWorkOrders = [...workOrdersCache, newWorkOrder];
+      localStorage.setItem("WORK_ORDERS_CACHE_V1", JSON.stringify(updatedWorkOrders));
+
       setIsCalculating(false);
       toast.success("Penalty calculated and saved successfully");
     }, 500);
@@ -98,7 +117,37 @@ const SLAPenaltyCalculator = () => {
   };
 
   const handleSendInvoice = (penaltyId: string) => {
+    // Update penalty status in admin side
     updatePenaltyStatus(penaltyId, 'Invoice Sent');
+    
+    // Sync to vendor portal
+    const penalty = penalties.find(p => p.id === penaltyId);
+    if (penalty) {
+      const vendorPenalty = {
+        id: penaltyId,
+        vendorId: penalty.vendor,
+        vendorName: penalty.vendor,
+        breachType: penalty.slaType,
+        penaltyAmount: penalty.calculatedAmount,
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        status: 'Invoice Sent',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        description: `SLA breach penalty for ${penalty.slaType} - ${penalty.severityLevel} severity`,
+        createdDate: penalty.createdAt.toISOString().split('T')[0]
+      };
+      
+      // Save to vendor penalties cache
+      const existingPenalties = JSON.parse(localStorage.getItem("SLA_PENALTIES_CACHE_V1") || "[]");
+      const updatedPenalties = [...existingPenalties.filter((p: any) => p.id !== penaltyId), vendorPenalty];
+      localStorage.setItem("SLA_PENALTIES_CACHE_V1", JSON.stringify(updatedPenalties));
+      
+      // Also save to admin penalties for sync back
+      localStorage.setItem("SLA_PENALTIES_ADMIN_V1", JSON.stringify(penalties));
+      
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('sla-penalties-updated'));
+    }
+    
     toast.success("Invoice sent to vendor");
   };
 
@@ -386,7 +435,7 @@ const SLAPenaltyCalculator = () => {
                       <td className="p-4 font-mono text-sm">{penalty.id.split('-').slice(-2).join('-')}</td>
                       <td className="p-4 text-sm">{penalty.slaType}</td>
                       <td className="p-4 text-sm">{penalty.vendor}</td>
-                      <td className="p-4 text-right font-medium">{penalty.calculatedAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</td>
+                      <td className="p-4 text-right font-medium">{penalty.calculatedAmount?.toLocaleString('en-GH', { minimumFractionDigits: 2 }) || '0.00'}</td>
                       <td className="p-4">{getStatusBadge(penalty.status)}</td>
                       <td className="p-4 text-sm">{penalty.createdAt.toLocaleDateString()}</td>
                       <td className="p-4 text-right">

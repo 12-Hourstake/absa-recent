@@ -22,60 +22,60 @@ import {
   Eye,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
-
-const mockWorkOrders = [
-  {
-    id: "WO-2024-0342",
-    requestType: "Maintenance",
-    asset: "HVAC Unit - Floor 3",
-    location: "Accra Main Branch",
-    priority: "High",
-    status: "In Progress",
-    assignedDate: "2025-03-15",
-    dueDate: "2025-03-20",
-    description: "Regular maintenance of HVAC system on floor 3",
-  },
-  {
-    id: "WO-2024-0341",
-    requestType: "Fuel",
-    asset: "Generator - Kumasi",
-    location: "Kumasi Branch",
-    priority: "Medium",
-    status: "New",
-    assignedDate: "2025-03-16",
-    dueDate: "2025-03-22",
-    description: "Fuel supply for backup generator",
-  },
-  {
-    id: "WO-2024-0340",
-    requestType: "Utilities",
-    asset: "Plumbing - Restroom",
-    location: "Takoradi Branch",
-    priority: "High",
-    status: "New",
-    assignedDate: "2025-03-16",
-    dueDate: "2025-03-21",
-    description: "Repair leaking pipes in main restroom",
-  },
-  {
-    id: "WO-2024-0339",
-    requestType: "Maintenance",
-    asset: "Elevator - Main Building",
-    location: "Accra Main Branch",
-    priority: "Low",
-    status: "Completed",
-    assignedDate: "2025-03-10",
-    dueDate: "2025-03-18",
-    description: "Monthly elevator inspection and maintenance",
-  },
-];
-
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 const VendorWorkOrders = () => {
+  const [workOrders, setWorkOrders] = useState<any[]>([]);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<any>(null);
   const [newStatus, setNewStatus] = useState("");
   const [completionComment, setCompletionComment] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    loadWorkOrders();
+    
+    // Listen for storage changes to sync with admin updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "WORK_ORDERS_CACHE_V1") {
+        loadWorkOrders();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events for same-tab updates
+    const handleCustomUpdate = () => {
+      loadWorkOrders();
+    };
+    
+    window.addEventListener('work-orders-updated', handleCustomUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('work-orders-updated', handleCustomUpdate);
+    };
+  }, []);
+
+  const loadWorkOrders = () => {
+    try {
+      const cached = localStorage.getItem("WORK_ORDERS_CACHE_V1");
+      const allWorkOrders = cached ? JSON.parse(cached) : [];
+      
+      // Filter work orders for current vendor
+      const currentVendorId = localStorage.getItem("AUTH_SESSION_V1") 
+        ? JSON.parse(localStorage.getItem("AUTH_SESSION_V1") || "{}").vendorId 
+        : "VEN-001";
+      
+      // Check both assignedVendor and vendorId fields for compatibility
+      const vendorWorkOrders = allWorkOrders.filter((wo: any) => 
+        wo.assignedVendor === currentVendorId || wo.vendorId === currentVendorId
+      );
+      setWorkOrders(vendorWorkOrders);
+    } catch (err) {
+      console.error("Error loading work orders:", err);
+      setWorkOrders([]);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -99,14 +99,44 @@ const VendorWorkOrders = () => {
   };
 
   const handleUpdateStatus = () => {
-    // Update work order status logic here
-    console.log("Updating status to:", newStatus);
-    console.log("Comment:", completionComment);
-    console.log("Evidence file:", evidenceFile);
-    setSelectedWorkOrder(null);
-    setNewStatus("");
-    setCompletionComment("");
-    setEvidenceFile(null);
+    if (!selectedWorkOrder || !newStatus) return;
+    
+    try {
+      // Update work order in cache
+      const cached = localStorage.getItem("WORK_ORDERS_CACHE_V1");
+      const allWorkOrders = cached ? JSON.parse(cached) : [];
+      
+      const updatedWorkOrders = allWorkOrders.map((wo: any) => 
+        wo.id === selectedWorkOrder.id 
+          ? { 
+              ...wo, 
+              status: newStatus,
+              completionComment,
+              lastUpdated: new Date().toISOString(),
+              updatedBy: 'vendor'
+            }
+          : wo
+      );
+      
+      localStorage.setItem("WORK_ORDERS_CACHE_V1", JSON.stringify(updatedWorkOrders));
+      
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('work-orders-updated'));
+      
+      // Reload work orders
+      loadWorkOrders();
+      
+      // Reset form
+      setSelectedWorkOrder(null);
+      setNewStatus("");
+      setCompletionComment("");
+      setEvidenceFile(null);
+      
+      toast.success(`Work order status updated to ${newStatus}`);
+    } catch (err) {
+      console.error("Error updating work order:", err);
+      toast.error("Failed to update work order status");
+    }
   };
 
   return (
@@ -127,7 +157,7 @@ const VendorWorkOrders = () => {
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#870A3C]">{mockWorkOrders.length}</div>
+            <div className="text-2xl font-bold text-[#870A3C]">{workOrders.length}</div>
             <p className="text-xs text-muted-foreground">All assigned orders</p>
           </CardContent>
         </Card>
@@ -139,7 +169,7 @@ const VendorWorkOrders = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {mockWorkOrders.filter((wo) => wo.status === "New").length}
+              {workOrders.filter((wo) => wo.status === "New").length}
             </div>
             <p className="text-xs text-muted-foreground">Awaiting start</p>
           </CardContent>
@@ -152,7 +182,7 @@ const VendorWorkOrders = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {mockWorkOrders.filter((wo) => wo.status === "In Progress").length}
+              {workOrders.filter((wo) => wo.status === "In Progress").length}
             </div>
             <p className="text-xs text-muted-foreground">Currently working</p>
           </CardContent>
@@ -165,7 +195,7 @@ const VendorWorkOrders = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {mockWorkOrders.filter((wo) => wo.status === "Completed").length}
+              {workOrders.filter((wo) => wo.status === "Completed").length}
             </div>
             <p className="text-xs text-muted-foreground">Successfully finished</p>
           </CardContent>
@@ -193,7 +223,7 @@ const VendorWorkOrders = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockWorkOrders.map((workOrder) => (
+                {workOrders.map((workOrder) => (
                   <TableRow key={workOrder.id} className="hover:bg-gray-50">
                     <TableCell className="font-mono text-sm">{workOrder.id}</TableCell>
                     <TableCell>{workOrder.requestType}</TableCell>
@@ -375,7 +405,7 @@ const VendorWorkOrders = () => {
             </Table>
           </div>
           
-          {mockWorkOrders.length === 0 && (
+          {workOrders.length === 0 && (
             <div className="text-center py-8">
               <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-muted-foreground">No Work Orders</h3>

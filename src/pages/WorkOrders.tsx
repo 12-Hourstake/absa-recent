@@ -289,6 +289,7 @@ const WorkOrders = () => {
         estimatedCost: formData.estimatedCost,
         vendorId: formData.vendorId,
         vendorName: selectedVendor.name,
+        assignedVendor: formData.vendorId, // For vendor portal sync
         slaId: applicableSLA?.id,
         slaName: applicableSLA?.slaName,
         priorityLevel: applicableSLA?.priorityLevel,
@@ -301,6 +302,9 @@ const WorkOrders = () => {
       const updatedWorkOrders = [...workOrders, newWorkOrder];
       setWorkOrders(updatedWorkOrders);
       saveWorkOrders(updatedWorkOrders);
+      
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('work-orders-updated'));
 
       // Reset form
       setFormData({
@@ -385,6 +389,7 @@ const WorkOrders = () => {
         estimatedCost: formData.estimatedCost,
         vendorId: formData.vendorId,
         vendorName: selectedVendorForUpdate.name,
+        assignedVendor: formData.vendorId, // For vendor portal sync
         slaId: applicableSLA?.id,
         slaName: applicableSLA?.slaName,
         priorityLevel: applicableSLA?.priorityLevel,
@@ -400,6 +405,9 @@ const WorkOrders = () => {
       
       setWorkOrders(updatedWorkOrders);
       saveWorkOrders(updatedWorkOrders);
+      
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('work-orders-updated'));
 
       // Reset form
       setFormData({
@@ -433,6 +441,9 @@ const WorkOrders = () => {
       const updatedWorkOrders = workOrders.filter(wo => wo.id !== workOrderId);
       setWorkOrders(updatedWorkOrders);
       saveWorkOrders(updatedWorkOrders);
+      
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('work-orders-updated'));
       setDeleteWorkOrderId(null);
       setSuccess("Work order deleted successfully!");
       setTimeout(() => setSuccess(""), 3000);
@@ -460,7 +471,8 @@ const WorkOrders = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
       {/* Success/Error Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -489,137 +501,231 @@ const WorkOrders = () => {
         </Alert>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Work Orders</h1>
-          <p className="text-muted-foreground">Manage maintenance work orders for assets (KPI Data Source)</p>
-        </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Create Work Order
-        </Button>
-      </div>
-
-      {/* Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search work orders..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Work Orders</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base truncate">Manage maintenance work orders for assets (KPI Data Source)</p>
           </div>
-        </CardContent>
-      </Card>
+          <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2 w-full sm:w-auto flex-shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Create Work Order</span>
+          </Button>
+        </div>
 
-      {/* Work Orders Table */}
-      <Card>
-        <CardHeader className="bg-muted/50 p-4">
-          <CardTitle className="text-base">Work Orders ({filteredWorkOrders.length}) - Vendor KPI Source</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-muted/50">
-                <TableRow>
-                  <TableHead className="text-sm">Work Order ID</TableHead>
-                  <TableHead className="text-sm">Asset Name</TableHead>
-                  <TableHead className="text-sm">Vendor</TableHead>
-                  <TableHead className="text-sm">Type</TableHead>
-                  <TableHead className="text-sm">Status</TableHead>
-                  <TableHead className="text-sm">SLA</TableHead>
-                  <TableHead className="text-sm">SLA Status</TableHead>
-                  <TableHead className="text-sm">Due Date</TableHead>
-                  <TableHead className="text-sm">Created Date</TableHead>
-                  <TableHead className="text-sm text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredWorkOrders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? "No work orders found matching your search." : "No work orders created yet."}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredWorkOrders.map((workOrder) => {
+        {/* Search */}
+        <Card className="w-full">
+          <CardContent className="p-2 sm:p-3 lg:p-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <Input
+                placeholder="Search work orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm w-full min-w-0"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Work Orders Table */}
+        <Card className="w-full">
+          <CardHeader className="bg-muted/50 p-2 sm:p-3 lg:p-4">
+            <CardTitle className="text-sm lg:text-base truncate">Work Orders ({filteredWorkOrders.length}) - Vendor KPI Source</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 w-full">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block w-full">
+              <div className="w-full overflow-x-auto">
+                <Table className="w-full table-fixed">
+                  <TableHeader className="sticky top-0 bg-muted/50">
+                    <TableRow>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">Work Order ID</TableHead>
+                      <TableHead className="w-[12%] min-w-[100px] text-xs">Asset Name</TableHead>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">Vendor</TableHead>
+                      <TableHead className="w-[8%] min-w-[60px] text-xs">Type</TableHead>
+                      <TableHead className="w-[8%] min-w-[60px] text-xs">Status</TableHead>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">SLA</TableHead>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">SLA Status</TableHead>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">Due Date</TableHead>
+                      <TableHead className="w-[10%] min-w-[80px] text-xs">Created Date</TableHead>
+                      <TableHead className="w-[12%] min-w-[100px] text-xs text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredWorkOrders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                          {searchTerm ? "No work orders found matching your search." : "No work orders created yet."}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredWorkOrders.map((workOrder) => {
+                        const isOverdue = overdueWorkOrders.some(owo => owo.id === workOrder.id);
+                        
+                        return (
+                          <TableRow key={workOrder.id} className={`hover:bg-muted/50 ${isOverdue ? 'bg-red-50' : ''}`}>
+                            <TableCell className="text-xs font-mono truncate" title={workOrder.id}>{workOrder.id}</TableCell>
+                            <TableCell className="text-xs truncate" title={workOrder.assetName}>{workOrder.assetName}</TableCell>
+                            <TableCell className="text-xs truncate" title={workOrder.vendorName || 'Unassigned'}>{workOrder.vendorName || 'Unassigned'}</TableCell>
+                            <TableCell>{getTypeBadge(workOrder.workOrderType)}</TableCell>
+                            <TableCell>{getStatusBadge(workOrder.status)}</TableCell>
+                            <TableCell className="text-xs">
+                              {workOrder.slaName ? (
+                                <span className="text-xs bg-purple-50 text-purple-700 px-1 py-1 rounded truncate block" title={workOrder.priorityLevel}>
+                                  {workOrder.slaName}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">No SLA</span>
+                              )}
+                            </TableCell>
+                            <TableCell>{getSLABadge(workOrder.slaStatus)}</TableCell>
+                            <TableCell className="text-xs">
+                              {workOrder.dueDate ? (
+                                <span className={`truncate block ${isOverdue ? 'text-red-600 font-semibold' : ''}`} title={workOrder.dueDate}>
+                                  {workOrder.dueDate}
+                                  {isOverdue && ' (OVERDUE)'}
+                                </span>
+                              ) : (
+                                'No due date'
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs truncate">{workOrder.createdDate}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Button variant="ghost" size="icon" title="View Details" onClick={() => handleViewWorkOrder(workOrder)} className="h-8 w-8">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" title="Edit Work Order" onClick={() => handleEditWorkOrder(workOrder)} className="h-8 w-8">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  title="Delete Work Order" 
+                                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => setDeleteWorkOrderId(workOrder.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden w-full">
+              {filteredWorkOrders.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground px-3">
+                  <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="text-base font-medium">No Work Orders Found</h3>
+                  <p className="text-sm break-words">
+                    {searchTerm ? "No work orders found matching your search." : "No work orders created yet."}
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y w-full">
+                  {filteredWorkOrders.map((workOrder) => {
                     const isOverdue = overdueWorkOrders.some(owo => owo.id === workOrder.id);
                     
                     return (
-                      <TableRow key={workOrder.id} className={`hover:bg-muted/50 ${isOverdue ? 'bg-red-50' : ''}`}>
-                        <TableCell className="text-sm font-mono">{workOrder.id}</TableCell>
-                        <TableCell className="text-sm">{workOrder.assetName}</TableCell>
-                        <TableCell className="text-sm">{workOrder.vendorName || 'Unassigned'}</TableCell>
-                        <TableCell>{getTypeBadge(workOrder.workOrderType)}</TableCell>
-                        <TableCell>{getStatusBadge(workOrder.status)}</TableCell>
-                        <TableCell className="text-sm">
-                          {workOrder.slaName ? (
-                            <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded" title={workOrder.priorityLevel}>
-                              {workOrder.slaName}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">No SLA</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{getSLABadge(workOrder.slaStatus)}</TableCell>
-                        <TableCell className="text-sm">
-                          {workOrder.dueDate ? (
-                            <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
-                              {workOrder.dueDate}
-                              {isOverdue && ' (OVERDUE)'}
-                            </span>
-                          ) : (
-                            'No due date'
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm">{workOrder.createdDate}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" title="View Details" onClick={() => handleViewWorkOrder(workOrder)}>
-                              <Eye className="h-4 w-4" />
+                      <div key={workOrder.id} className={`p-3 space-y-3 w-full min-w-0 ${isOverdue ? 'bg-red-50' : ''}`}>
+                        <div className="flex items-start justify-between gap-2 w-full">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-sm sm:text-base break-words">{workOrder.id}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground truncate">{workOrder.assetName}</p>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Button variant="ghost" size="sm" onClick={() => handleViewWorkOrder(workOrder)} className="h-8 w-8 p-0">
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" title="Edit Work Order" onClick={() => handleEditWorkOrder(workOrder)}>
-                              <Edit className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" onClick={() => handleEditWorkOrder(workOrder)} className="h-8 w-8 p-0">
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              title="Delete Work Order" 
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => setDeleteWorkOrderId(workOrder.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" onClick={() => setDeleteWorkOrderId(workOrder.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm w-full">
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Vendor:</span>
+                            <p className="break-words mt-1">{workOrder.vendorName || 'Unassigned'}</p>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Type:</span>
+                            <div className="mt-1">
+                              {getTypeBadge(workOrder.workOrderType)}
+                            </div>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Status:</span>
+                            <div className="mt-1">
+                              {getStatusBadge(workOrder.status)}
+                            </div>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">SLA Status:</span>
+                            <div className="mt-1">
+                              {getSLABadge(workOrder.slaStatus)}
+                            </div>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Due Date:</span>
+                            <p className={`text-xs mt-1 break-words ${isOverdue ? 'text-red-600 font-semibold' : ''}`}>
+                              {workOrder.dueDate ? (
+                                <>
+                                  {workOrder.dueDate}
+                                  {isOverdue && ' (OVERDUE)'}
+                                </>
+                              ) : (
+                                'No due date'
+                              )}
+                            </p>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Created:</span>
+                            <p className="text-xs mt-1 break-words">{workOrder.createdDate}</p>
+                          </div>
+                        </div>
+                        
+                        {workOrder.slaName && (
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block text-xs">SLA:</span>
+                            <p className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded mt-1 break-words">
+                              {workOrder.slaName}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  })}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Create Work Order Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Create Work Order
-            </DialogTitle>
-            <DialogDescription>
-              Create a new work order for an existing asset (feeds vendor KPI data)
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
+        {/* Create Work Order Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="truncate">Create Work Order</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm break-words">
+                Create a new work order for an existing asset (feeds vendor KPI data)
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
             <div className="space-y-2">
               <Label htmlFor="asset">Asset *</Label>
               <CustomSelectDropdown
@@ -761,65 +867,66 @@ const WorkOrders = () => {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateWorkOrder}>
-              Create Work Order
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button onClick={handleCreateWorkOrder} className="w-full sm:w-auto order-1 sm:order-2">
+                Create Work Order
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteWorkOrderId} onOpenChange={() => setDeleteWorkOrderId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Work Order</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this work order? This will affect vendor KPI calculations.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteWorkOrderId(null)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={() => deleteWorkOrderId && handleDeleteWorkOrder(deleteWorkOrderId)}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deleteWorkOrderId} onOpenChange={() => setDeleteWorkOrderId(null)}>
+          <DialogContent className="w-[95vw] max-w-[400px] mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-base sm:text-lg lg:text-xl truncate">Delete Work Order</DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm break-words">
+                Are you sure you want to delete this work order? This will affect vendor KPI calculations.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => setDeleteWorkOrderId(null)} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => deleteWorkOrderId && handleDeleteWorkOrder(deleteWorkOrderId)}
+                className="w-full sm:w-auto order-1 sm:order-2"
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* View Work Order Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Work Order Details
-            </DialogTitle>
-            <DialogDescription>
-              View complete details of work order {selectedWorkOrder?.id}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedWorkOrder && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground">Work Order ID</Label>
-                  <div className="font-mono font-semibold">{selectedWorkOrder.id}</div>
+        {/* View Work Order Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
+                <Eye className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="truncate">Work Order Details</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm break-words">
+                View complete details of work order {selectedWorkOrder?.id}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedWorkOrder && (
+              <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
+                  <div className="space-y-2 min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Work Order ID</Label>
+                    <div className="font-mono font-semibold text-xs sm:text-sm break-all">{selectedWorkOrder.id}</div>
+                  </div>
+                  <div className="space-y-2 min-w-0">
+                    <Label className="text-xs sm:text-sm text-muted-foreground">Created Date</Label>
+                    <div className="text-xs sm:text-sm break-words">{selectedWorkOrder.createdDate}</div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground">Created Date</Label>
-                  <div>{selectedWorkOrder.createdDate}</div>
-                </div>
-              </div>
 
               <div className="space-y-2">
                 <Label className="text-muted-foreground">Title</Label>
@@ -917,34 +1024,34 @@ const WorkOrders = () => {
             </div>
           )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
-              Close
-            </Button>
-            <Button onClick={() => {
-              setIsViewModalOpen(false);
-              if (selectedWorkOrder) handleEditWorkOrder(selectedWorkOrder);
-            }}>
-              Edit Work Order
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="w-full">
+              <Button variant="outline" onClick={() => setIsViewModalOpen(false)} className="w-full sm:w-auto">
+                Close
+              </Button>
+              <Button onClick={() => {
+                setIsViewModalOpen(false);
+                if (selectedWorkOrder) handleEditWorkOrder(selectedWorkOrder);
+              }} className="w-full sm:w-auto">
+                Edit Work Order
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Edit Work Order Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Work Order
-            </DialogTitle>
-            <DialogDescription>
-              Update work order {selectedWorkOrder?.id}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
+        {/* Edit Work Order Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto mx-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
+                <Edit className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="truncate">Edit Work Order</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm break-words">
+                Update work order {selectedWorkOrder?.id}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-3 sm:gap-4 py-4 w-full min-w-0">
             <div className="space-y-2">
               <Label htmlFor="edit-asset">Asset *</Label>
               <CustomSelectDropdown
@@ -1086,19 +1193,20 @@ const WorkOrders = () => {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setIsEditModalOpen(false);
-              setSelectedWorkOrder(null);
-            }}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateWorkOrder}>
-              Update Work Order
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button variant="outline" onClick={() => {
+                setIsEditModalOpen(false);
+                setSelectedWorkOrder(null);
+              }} className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateWorkOrder} className="w-full sm:w-auto order-1 sm:order-2">
+                Update Work Order
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

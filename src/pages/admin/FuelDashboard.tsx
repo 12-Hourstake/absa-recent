@@ -282,7 +282,8 @@ const FuelDashboard = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden min-w-0">
+      <div className="p-4 space-y-6 min-w-0">
       {/* Success/Error Messages */}
       {success && (
         <Alert className="border-green-200 bg-green-50">
@@ -296,10 +297,10 @@ const FuelDashboard = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Fuel Management Dashboard</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
+        <div className="min-w-0">
+          <h1 className="text-xl lg:text-2xl font-bold tracking-tight break-words">Fuel Management Dashboard</h1>
+          <p className="text-muted-foreground text-sm break-words">
             Monitor {selectedFuelType.toLowerCase()} fuel levels, approvals, purchases, and deliveries
           </p>
         </div>
@@ -736,6 +737,7 @@ const FuelDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

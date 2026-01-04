@@ -77,8 +77,9 @@ const FuelCards = () => {
   };
 
   const handleAddCard = () => {
+    const entityName = selectedFuelType === "GENERATOR" ? "generatorName" : "vehicleName";
     if (!formData.cardNumber || !formData.assignedBranch || !formData.generatorName) {
-      setError("Please fill all required fields");
+      setError(`Please fill all required fields`);
       return;
     }
     const newCard: FuelCard = {
@@ -96,7 +97,7 @@ const FuelCards = () => {
     const updated = [...fuelCards, newCard];
     setFuelCards(updated);
     FuelDataManager.saveFuelCards(selectedFuelType, updated);
-    setSuccess("Fuel card added successfully");
+    setSuccess(`${selectedFuelType === "GENERATOR" ? "Generator" : "Vehicle"} fuel card added successfully`);
     setShowAddModal(false);
     resetForm();
     setTimeout(() => setSuccess(""), 3000);
@@ -169,7 +170,8 @@ const FuelCards = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-w-0">
       {success && (
         <Alert className="border-green-200 bg-green-50">
           <AlertDescription className="text-green-800">✅ {success}</AlertDescription>
@@ -181,41 +183,41 @@ const FuelCards = () => {
         </Alert>
       )}
 
-      <div className="flex flex-wrap justify-between items-start gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Fuel Cards</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage {selectedFuelType === "GENERATOR" ? "site-specific generator" : "vehicle-assigned"} fuel cards under dual control
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight truncate">Fuel Cards</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base break-words mt-1">
+              Manage {selectedFuelType === "GENERATOR" ? "site-specific generator" : "vehicle-assigned"} fuel cards under dual control
+            </p>
+          </div>
+          <Button onClick={() => setShowAddModal(true)} className="gap-2 bg-red-600 hover:bg-red-700 w-full sm:w-auto flex-shrink-0">
+            <Plus className="h-4 w-4" />
+            <span className="truncate">Add Fuel Card</span>
+          </Button>
         </div>
-        <Button onClick={() => setShowAddModal(true)} className="gap-2 bg-red-600 hover:bg-red-700">
-          <Plus className="h-4 w-4" />
-          Add Fuel Card
-        </Button>
-      </div>
 
       {/* Fuel Type Tabs */}
       <FuelTabs selectedType={selectedFuelType} onTypeChange={handleFuelTypeChange} />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Total Cards</p>
-          <p className="text-2xl font-bold mt-2">{stats.total}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">In Use</p>
-          <p className="text-2xl font-bold mt-2 text-green-600">{stats.inUse}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">In Safe</p>
-          <p className="text-2xl font-bold mt-2 text-blue-600">{stats.inSafe}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm font-medium text-muted-foreground">Suspended</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.suspended}</p>
-        </Card>
-      </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-6">
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Total Cards</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2">{stats.total}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">In Use</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-green-600">{stats.inUse}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">In Safe</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-blue-600">{stats.inSafe}</p>
+          </Card>
+          <Card className="p-3 sm:p-4 lg:p-6 min-w-0">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Suspended</p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold mt-1 sm:mt-2 text-red-600">{stats.suspended}</p>
+          </Card>
+        </div>
 
       {/* Filters */}
       <Card className="p-4">
@@ -257,7 +259,7 @@ const FuelCards = () => {
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Card Number</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Branch/Site</th>
-                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Generator</th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">{selectedFuelType === "GENERATOR" ? "Generator" : "Vehicle"}</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Last Used</th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Dual Control</th>
@@ -307,7 +309,9 @@ const FuelCards = () => {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Fuel Card</DialogTitle>
-            <DialogDescription>Register a new generator fuel card</DialogDescription>
+            <DialogDescription>
+              Register a new {selectedFuelType === "GENERATOR" ? "generator" : "vehicle"} fuel card
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -327,14 +331,29 @@ const FuelCards = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="generatorName">Generator Name *</Label>
-              <Input id="generatorName" value={formData.generatorName} onChange={(e) => setFormData({...formData, generatorName: e.target.value})} placeholder="Generator A1" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="generatorId">Generator ID *</Label>
-              <Input id="generatorId" value={formData.generatorId} onChange={(e) => setFormData({...formData, generatorId: e.target.value})} placeholder="GEN-XXX-001" />
-            </div>
+            {selectedFuelType === "GENERATOR" ? (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="generatorName">Generator Name *</Label>
+                  <Input id="generatorName" value={formData.generatorName} onChange={(e) => setFormData({...formData, generatorName: e.target.value})} placeholder="Generator A1" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="generatorId">Generator ID *</Label>
+                  <Input id="generatorId" value={formData.generatorId} onChange={(e) => setFormData({...formData, generatorId: e.target.value})} placeholder="GEN-XXX-001" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="vehicleName">Vehicle Name *</Label>
+                  <Input id="vehicleName" value={formData.generatorName} onChange={(e) => setFormData({...formData, generatorName: e.target.value})} placeholder="Company Car 1" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="vehicleId">Vehicle ID *</Label>
+                  <Input id="vehicleId" value={formData.generatorId} onChange={(e) => setFormData({...formData, generatorId: e.target.value})} placeholder="VEH-XXX-001" />
+                </div>
+              </>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as FuelCard["status"]})}>
@@ -468,6 +487,7 @@ const FuelCards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };

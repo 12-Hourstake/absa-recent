@@ -35,8 +35,8 @@ const VendorProfile = () => {
   const { penalties } = useSLA();
 
   // Calculate vendor penalties
-  const vendorPenalties = penalties.filter(p => p.vendor === user?.name);
-  const totalPenalties = vendorPenalties.reduce((sum, p) => sum + p.calculatedAmount, 0);
+  const vendorPenalties = penalties?.filter(p => p.vendor === user?.name) || [];
+  const totalPenalties = vendorPenalties.reduce((sum, p) => sum + (p.calculatedAmount || 0), 0);
   const pendingPenalties = vendorPenalties.filter(p => p.status === 'Pending Payment').length;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -460,7 +460,7 @@ const VendorProfile = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-red-600">
-                      GH₵ {penalty.calculatedAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      GH₵ {(penalty.calculatedAmount || 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                     </p>
                     <Badge className={penalty.status === 'Pending Payment' ? 'bg-yellow-100 text-yellow-800' : penalty.status === 'Invoice Sent' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
                       {penalty.status}
